@@ -45,6 +45,10 @@ impl Window {
         F: FnMut(&mut Window, f32) -> support::Action,
     {
         let program = support::shaders::load_program(&self.display).unwrap();
+        let params = glium::DrawParameters {
+            blend: glium::draw_parameters::Blend::alpha_blending(),
+            ..Default::default()
+        };
 
         use glium::Surface;
         support::start_loop(|delta| {
@@ -74,7 +78,7 @@ impl Window {
                                 &indices,
                                 &program,
                                 &glium::uniforms::EmptyUniforms,
-                                &Default::default(),
+                                &params,
                             )
                             .unwrap();
                     }
@@ -90,7 +94,7 @@ impl Window {
                                 &indices,
                                 &program,
                                 &glium::uniforms::EmptyUniforms,
-                                &Default::default(),
+                                &params,
                             )
                             .unwrap();
                     }
@@ -113,7 +117,7 @@ impl Window {
                                 &indices,
                                 &program,
                                 &glium::uniforms::EmptyUniforms,
-                                &Default::default(),
+                                &params,
                             )
                             .unwrap();
                     }
