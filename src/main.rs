@@ -1,4 +1,3 @@
-
 #[macro_use]
 extern crate glium;
 use glium::glutin;
@@ -8,7 +7,7 @@ use std::collections::HashMap;
 #[macro_use]
 mod support;
 
-pub enum Shape {
+enum Shape {
     Clear([f32; 4]),
     Rectangle(f32, f32, f32, f32, [f32; 4]),
     Triangle(f32, f32, f32, f32, f32, f32, [f32; 4]),
@@ -51,85 +50,81 @@ impl Window {
         support::start_loop(|delta| {
 
             let mut target = self.display.draw();
-            target.clear_color(0.0, 0.0, 0.0, 1.0);
 
             let mut rtn = callback(self, delta);
-            // for shape in self.shapes.iter() {
-            //     match shape {
-            //         Shape::Clear(color) => {
-            //             target.clear_color(color[0], color[1], color[2], color[3])
-            //         }
-            //         Shape::Rectangle(x1, y1, x2, y2, color) => {
-            //             let vert_buff = support::buffer::rectangle_vert_buff(
-            //                 &self.display,
-            //                 x1,
-            //                 x2,
-            //                 y1,
-            //                 y2,
-            //                 self.color,
-            //             ).unwrap();
-            //             let indices =
-            //                 glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
-            //             target
-            //                 .draw(
-            //                     &vert_buff,
-            //                     &indices,
-            //                     &program,
-            //                     &glium::uniforms::EmptyUniforms,
-            //                     &Default::default(),
-            //                 )
-            //                 .unwrap();
-            //         }
-            //         Shape::Line(x1, y1, x2, y2, color) => {
-            //             let vert_buff = support::buffer::line_vert_buff(
-            //                 &self.display,
-            //                 x1,
-            //                 x2,
-            //                 y1,
-            //                 y2,
-            //                 self.color,
-            //             ).unwrap();
-            //             let indices =
-            //                 glium::index::NoIndices(glium::index::PrimitiveType::LineStrip);
-            //             target
-            //                 .draw(
-            //                     &vert_buff,
-            //                     &indices,
-            //                     &program,
-            //                     &glium::uniforms::EmptyUniforms,
-            //                     &Default::default(),
-            //                 )
-            //                 .unwrap();
-            //         }
-            //         Shape::Triangle(x1, y1, x2, y2, x3, y3, color) => {
-            //             let vert_buff = support::buffer::triangle_vert_buff(
-            //                 &self.display,
-            //                 x1,
-            //                 x2,
-            //                 y1,
-            //                 y2,
-            //                 x3,
-            //                 y3,
-            //                 self.color,
-            //             ).unwrap();
-            //             let indices =
-            //                 glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-            //             target
-            //                 .draw(
-            //                     &vert_buff,
-            //                     &indices,
-            //                     &program,
-            //                     &glium::uniforms::EmptyUniforms,
-            //                     &Default::default(),
-            //                 )
-            //                 .unwrap();
-            //         }
-            //     }
-            // }
+            for shape in self.shapes.iter() {
+                match shape {
+                    &Shape::Clear(color) => {
+                        target.clear_color(color[0], color[1], color[2], color[3])
+                    }
+                    &Shape::Rectangle(x1, y1, x2, y2, color) => {
+                        let vert_buff = support::buffer::rectangle_vert_buff(
+                            &self.display,
+                            x1,
+                            y1,
+                            x2,
+                            y2,
+                            color,
+                        ).unwrap();
+                        let indices =
+                            glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
+                        target
+                            .draw(
+                                &vert_buff,
+                                &indices,
+                                &program,
+                                &glium::uniforms::EmptyUniforms,
+                                &Default::default(),
+                            )
+                            .unwrap();
+                    }
+                    &Shape::Line(x1, y1, x2, y2, color) => {
+                        let vert_buff =
+                            support::buffer::line_vert_buff(&self.display, x1, y1, x2, y2, color)
+                                .unwrap();
+                        let indices =
+                            glium::index::NoIndices(glium::index::PrimitiveType::LineStrip);
+                        target
+                            .draw(
+                                &vert_buff,
+                                &indices,
+                                &program,
+                                &glium::uniforms::EmptyUniforms,
+                                &Default::default(),
+                            )
+                            .unwrap();
+                    }
+                    &Shape::Triangle(x1, y1, x2, y2, x3, y3, color) => {
+                        let vert_buff = support::buffer::triangle_vert_buff(
+                            &self.display,
+                            x1,
+                            y1,
+                            x2,
+                            y2,
+                            x3,
+                            y3,
+                            color,
+                        ).unwrap();
+                        let indices =
+                            glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+                        target
+                            .draw(
+                                &vert_buff,
+                                &indices,
+                                &program,
+                                &glium::uniforms::EmptyUniforms,
+                                &Default::default(),
+                            )
+                            .unwrap();
+                    }
+                }
+            }
+
             self.shapes.clear();
 
             target.finish().unwrap();
 
+            let mut keys: HashMap<glutin::VirtualKeyCode, bool> = HashMap::new();
             self.events_loop.poll_events(|ev| match ev {
                 glium::glutin::Event::WindowEvent { event, .. } => {
                     match event {
@@ -137,13 +132,13 @@ impl Window {
                         glutin::WindowEvent::KeyboardInput { input, .. } => {
                             match input.virtual_keycode {
                                 Some(key) => {
-                                    // self.keys.insert(
-                                    //     key,
-                                    //     match input.state {
-                                    //         glutin::ElementState::Pressed => true,
-                                    //         glutin::ElementState::Released => false,
-                                    //     },
-                                    // );
+                                    keys.insert(
+                                        key,
+                                        match input.state {
+                                            glutin::ElementState::Pressed => true,
+                                            glutin::ElementState::Released => false,
+                                        },
+                                    );
                                 }
                                 None => (),
                             }
@@ -153,6 +148,10 @@ impl Window {
                 }
                 _ => (),
             });
+
+            for (key, value) in keys {
+                self.keys.insert(key, value);
+            }
 
             rtn
         });
@@ -172,16 +171,7 @@ impl Window {
         self.shapes.push(shape);
     }
 
-    pub fn draw_triangle(
-        &mut self,
-        x1: f32,
-        y1: f32,
-        x2: f32,
-        y2: f32,
-        x3: f32,
-        y3: f32,
-        width: f32,
-    ) {
+    pub fn draw_triangle(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x3: f32, y3: f32) {
         let shape = Shape::Triangle(x1, y1, x2, y2, x3, y3, self.color);
         self.shapes.push(shape);
     }
@@ -196,7 +186,17 @@ fn main() {
     let mut window = Window::new("Hello World", 640, 480);
 
     window.start_loop(|app, delta| {
-        app.clear_color(0.0, 0.0, 0.0, 1.0);
+        app.clear_color(0.1, 0.3, 0.2, 1.0);
+
+        app.set_color(0.3, 0.1, 0.2, 1.0);
+        app.draw_rect(0.0, 0.0, 10.0, 10.0);
+
+        app.set_color(1.0, 0.0, 0.0, 1.0);
+        app.draw_line(0.0, 0.0, 1.0, 1.0);
+
+        app.set_color(0.0, 0.0, 1.0, 0.1);
+        app.draw_triangle(0.0, 0.0, 1.0, 1.0, 1.0, 0.0);
+
         support::Action::Continue
     });
 }
