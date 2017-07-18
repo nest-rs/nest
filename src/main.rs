@@ -134,9 +134,13 @@ impl Window {
         });
     }
 
-    pub fn clear_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
+    pub fn clear_to_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
         let shape = Shape::Clear([red, green, blue, alpha]);
         self.shapes.push(shape);
+    }
+
+    pub fn clear(&mut self) {
+        self.clear_to_color(0.0, 0.0, 0.0, 1.0);
     }
 
     pub fn set_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
@@ -210,7 +214,7 @@ fn main() {
     let mut window = Window::new("Hello World", 640, 480);
 
     window.start_loop(|app, delta| {
-        app.clear_color(0.1, 0.3, 0.2, 1.0);
+        app.clear();
 
         app.set_color_html("312");
         app.draw_rect((-0.5, -0.5), (0.5, 0.5));
