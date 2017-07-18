@@ -9,8 +9,6 @@ mod support;
 
 enum Shape {
     Clear([f32; 4]),
-    Rectangle(f32, f32, f32, f32, [f32; 4]),
-    Triangle(f32, f32, f32, f32, f32, f32, [f32; 4]),
     Polygon(Vec<(f32, f32)>, [f32; 4]),
     Line(f32, f32, f32, f32, [f32; 4]),
 }
@@ -62,56 +60,12 @@ impl Window {
                     &Shape::Clear(color) => {
                         target.clear_color(color[0], color[1], color[2], color[3])
                     }
-                    &Shape::Rectangle(x1, y1, x2, y2, color) => {
-                        let vert_buff = support::buffer::rectangle_vert_buff(
-                            &self.display,
-                            x1,
-                            y1,
-                            x2,
-                            y2,
-                            color,
-                        ).unwrap();
-                        let indices =
-                            glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
-                        target
-                            .draw(
-                                &vert_buff,
-                                &indices,
-                                &program,
-                                &glium::uniforms::EmptyUniforms,
-                                &params,
-                            )
-                            .unwrap();
-                    }
                     &Shape::Line(x1, y1, x2, y2, color) => {
                         let vert_buff =
                             support::buffer::line_vert_buff(&self.display, x1, y1, x2, y2, color)
                                 .unwrap();
                         let indices =
                             glium::index::NoIndices(glium::index::PrimitiveType::LineStrip);
-                        target
-                            .draw(
-                                &vert_buff,
-                                &indices,
-                                &program,
-                                &glium::uniforms::EmptyUniforms,
-                                &params,
-                            )
-                            .unwrap();
-                    }
-                    &Shape::Triangle(x1, y1, x2, y2, x3, y3, color) => {
-                        let vert_buff = support::buffer::triangle_vert_buff(
-                            &self.display,
-                            x1,
-                            y1,
-                            x2,
-                            y2,
-                            x3,
-                            y3,
-                            color,
-                        ).unwrap();
-                        let indices =
-                            glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
                         target
                             .draw(
                                 &vert_buff,
@@ -187,16 +141,6 @@ impl Window {
         self.color = [red, green, blue, alpha];
     }
 
-    pub fn draw_rect(&mut self, x: f32, y: f32, width: f32, height: f32) {
-        let shape = Shape::Rectangle(x, y, x + width, y + height, self.color);
-        self.shapes.push(shape);
-    }
-
-    pub fn draw_triangle(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x3: f32, y3: f32) {
-        let shape = Shape::Triangle(x1, y1, x2, y2, x3, y3, self.color);
-        self.shapes.push(shape);
-    }
-
     pub fn draw_line(&mut self, x1: f32, y1: f32, x2: f32, y2: f32) {
         let shape = Shape::Line(x1, y1, x2, y2, self.color);
         self.shapes.push(shape);
@@ -215,13 +159,13 @@ fn main() {
         app.clear_color(0.1, 0.3, 0.2, 1.0);
 
         app.set_color(0.3, 0.1, 0.2, 1.0);
-        app.draw_rect(0.0, 0.0, 10.0, 10.0);
+        app.draw(&[(0.0, 0.0), (10.0, 10.0)]);
 
         app.set_color(1.0, 0.0, 0.0, 1.0);
         app.draw_line(0.0, 0.0, 1.0, 1.0);
 
         app.set_color(0.0, 0.0, 1.0, 0.3);
-        app.draw_triangle(0.0, 0.0, 1.0, 1.0, 1.0, 0.0);
+        app.draw(&[(0.0, 0.0), (1.0, 1.0), (1.0, 0.0)]);
 
         app.set_color(0.0, 1.0, 0.0, 0.3);
         app.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
