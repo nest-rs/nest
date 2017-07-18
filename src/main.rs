@@ -175,11 +175,8 @@ impl Window {
         }
     }
 
-    pub fn draw_rect(&mut self, p1: (f32, f32), p2: (f32, f32)) {
-        let shape = Shape::Polygon(
-            vec![(p1.0, p1.1), (p1.0, p2.1), (p2.0, p2.1), (p2.0, p1.1)],
-            self.color,
-        );
+    pub fn draw(&mut self, points: &[(f32, f32)]) {
+        let shape = Shape::Polygon(Vec::from(points), self.color);
         self.shapes.push(shape);
     }
 
@@ -188,8 +185,23 @@ impl Window {
         self.shapes.push(shape);
     }
 
-    pub fn draw(&mut self, points: &[(f32, f32)]) {
-        let shape = Shape::Polygon(Vec::from(points), self.color);
+    pub fn draw_rect(&mut self, p1: (f32, f32), p2: (f32, f32)) {
+        let shape = Shape::Polygon(
+            vec![(p1.0, p1.1), (p1.0, p2.1), (p2.0, p2.1), (p2.0, p1.1)],
+            self.color,
+        );
+        self.shapes.push(shape);
+    }
+
+    pub fn draw_circle(&mut self, x: f32, y: f32, rx: f32, ry: f32, step_size: u32) {
+        let circle: Vec<(f32, f32)> = (0u32..360)
+            .filter(|d| d % step_size == 0)
+            .map(|d| {
+                let r = (d as f32).to_radians();
+                (r.cos() * rx, r.sin() * ry)
+            })
+            .collect();
+        let shape = Shape::Polygon(circle, self.color);
         self.shapes.push(shape);
     }
 }
@@ -215,14 +227,8 @@ fn main() {
         app.set_color(0.0, 1.0, 0.0, 0.3);
         app.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
 
-        let circle: Vec<(f32, f32)> = (0..360)
-            .map(|d| {
-                let r = (d as f32).to_radians();
-                (r.cos(), r.sin())
-            })
-            .collect();
         app.set_color(1.0, 0.0, 0.0, 0.3);
-        app.draw(&circle);
+        app.draw_circle(0.0, 0.0, 0.75, 0.25, 10);
 
         support::Action::Continue
     });
