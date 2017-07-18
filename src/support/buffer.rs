@@ -67,3 +67,18 @@ where
 
     glium::VertexBuffer::new(display, &shape)
 }
+
+pub fn poly_vert_buffer<'a, D>(
+    display: &'a D,
+    points: &[(f32, f32)],
+    color: [f32; 4],
+) -> Result<glium::VertexBuffer<Vertex>, glium::vertex::BufferCreationError>
+where
+    D: glium::backend::Facade,
+{
+    let mut shape: Vec<Vertex> = points
+        .iter()
+        .map(|point| Vertex::from(point.0, point.1, color))
+        .collect();
+    glium::VertexBuffer::new(display, &shape)
+}

@@ -11,6 +11,7 @@ enum Shape {
     Clear([f32; 4]),
     Rectangle(f32, f32, f32, f32, [f32; 4]),
     Triangle(f32, f32, f32, f32, f32, f32, [f32; 4]),
+    Polygon(Vec<(f32, f32)>, [f32; 4]),
     Line(f32, f32, f32, f32, [f32; 4]),
 }
 
@@ -121,6 +122,22 @@ impl Window {
                             )
                             .unwrap();
                     }
+                    &Shape::Polygon(ref points, color) => {
+                        let vert_buff =
+                            support::buffer::poly_vert_buffer(&self.display, &points, color)
+                                .unwrap();
+                        let indices =
+                            glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
+                        target
+                            .draw(
+                                &vert_buff,
+                                &indices,
+                                &program,
+                                &glium::uniforms::EmptyUniforms,
+                                &params,
+                            )
+                            .unwrap();
+                    }
                 }
             }
 
@@ -184,6 +201,11 @@ impl Window {
         let shape = Shape::Line(x1, y1, x2, y2, self.color);
         self.shapes.push(shape);
     }
+
+    pub fn draw(&mut self, points: &[(f32, f32)]) {
+        let shape = Shape::Polygon(Vec::from(points), self.color);
+        self.shapes.push(shape);
+    }
 }
 
 fn main() {
@@ -198,8 +220,20 @@ fn main() {
         app.set_color(1.0, 0.0, 0.0, 1.0);
         app.draw_line(0.0, 0.0, 1.0, 1.0);
 
-        app.set_color(0.0, 0.0, 1.0, 0.1);
+        app.set_color(0.0, 0.0, 1.0, 0.3);
         app.draw_triangle(0.0, 0.0, 1.0, 1.0, 1.0, 0.0);
+
+        app.set_color(0.0, 1.0, 0.0, 0.3);
+        app.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
+
+        let circle: Vec<(f32, f32)> = (0..360)
+            .map(|d| {
+                let r = (d as f32).to_radians();
+                (r.cos(), r.sin())
+            })
+            .collect();
+        app.set_color(1.0, 0.0, 0.0, 0.3);
+        app.draw(&circle);
 
         support::Action::Continue
     });
