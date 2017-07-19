@@ -17,7 +17,7 @@ pub enum Action {
     Stop,
 }
 
-fn as_sec(elapsed: Duration) -> f64 {
+pub fn as_sec(elapsed: Duration) -> f64 {
     elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 / 1000000000.0
 }
 
