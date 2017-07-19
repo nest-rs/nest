@@ -10,6 +10,7 @@ mod frame;
 
 pub use frame::Frame;
 pub use events::Event;
+pub use support::{Action, start_loop};
 pub use glium::glutin::{ElementState, VirtualKeyCode};
 
 use glium::glutin;
@@ -41,7 +42,7 @@ impl Window {
         }
     }
 
-    pub fn poll_events(&self) -> Vec<Event> {
+    pub fn poll_events(&mut self) -> Vec<Event> {
         let mut events: Vec<Event> = Vec::new();
 
         self.events_loop.poll_events(|ev| {
