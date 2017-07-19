@@ -38,17 +38,19 @@ fn main() {
         }
 
         for ev in app.poll_events() {
+            use Event::*;
+            use VirtualKeyCode::*;
             match ev {
-                Event::Closed => break 'main,
-                Event::KeyboardInput(ElementState::Pressed, Some(key)) => {
+                Closed => break 'main,
+                KeyboardInput(ElementState::Pressed, Some(key)) => {
                     match key {
-                        VirtualKeyCode::Space => println!("Space!"),
-                        VirtualKeyCode::Escape => break 'main,
+                        Space => println!("Space!"),
+                        Escape => break 'main,
                         _ => (),
                     };
                     keymap.insert(key, true);
                 }
-                Event::KeyboardInput(ElementState::Released, Some(key)) => {
+                KeyboardInput(ElementState::Released, Some(key)) => {
                     keymap.insert(key, false);
                 }
                 _ => (),
