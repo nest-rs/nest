@@ -1,42 +1,49 @@
 
 extern crate love2d;
-use love2d::{Window, Action, Event};
+use love2d::{Window, Event};
 use love2d::{ElementState, VirtualKeyCode};
 
 use std::collections::HashMap;
 
 fn main() {
-    let mut window = Window::new("Hello World", 640, 480);
+    let mut app = Window::new("Hello World", 640, 480);
     let mut keymap: HashMap<VirtualKeyCode, bool> = HashMap::new();
 
-    window.start_loop(|app, _| {
-        app.clear();
+    'main: loop {
+        {
+            let mut frame = app.next_frame();
+            frame.clear();
 
-        app.set_color_html("312");
-        app.draw_rect((-0.5, -0.5), (0.5, 0.5));
+            // let delta = frame.delta();
 
-        app.set_color_html("#033112");
-        app.draw_rect((0.0, 0.0), (-1.0, -1.0));
+            frame.set_color_html("312");
+            frame.draw_rect((-0.5, -0.5), (0.5, 0.5));
 
-        app.set_color(1.0, 0.0, 0.0, 1.0);
-        app.draw_line(0.0, 0.0, 1.0, 1.0);
+            frame.set_color_html("#033112");
+            frame.draw_rect((0.0, 0.0), (-1.0, -1.0));
 
-        app.set_color(0.0, 0.0, 1.0, 0.3);
-        app.draw(&[(0.0, 0.0), (1.0, 1.0), (1.0, 0.0)]);
+            frame.set_color(1.0, 0.0, 0.0, 1.0);
+            frame.draw_line(0.0, 0.0, 1.0, 1.0);
 
-        app.set_color(0.0, 1.0, 0.0, 0.3);
-        app.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
+            frame.set_color(0.0, 0.0, 1.0, 0.3);
+            frame.draw(&[(0.0, 0.0), (1.0, 1.0), (1.0, 0.0)]);
 
-        app.set_color(1.0, 0.0, 0.0, 0.3);
-        app.draw_circle(0.25, -0.25, 0.75, 0.25, 10);
+            frame.set_color(0.0, 1.0, 0.0, 0.3);
+            frame.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
+
+            frame.set_color(1.0, 0.0, 0.0, 0.3);
+            frame.draw_circle(0.25, -0.25, 0.75, 0.25, 10);
+
+            frame.finish();
+        }
 
         for ev in app.poll_events() {
             match ev {
-                Event::Closed => return Action::Stop,
+                Event::Closed => break 'main,
                 Event::KeyboardInput(ElementState::Pressed, Some(key)) => {
                     match key {
                         VirtualKeyCode::Space => println!("Space!"),
-                        VirtualKeyCode::Escape => return Action::Stop,
+                        VirtualKeyCode::Escape => break 'main,
                         _ => (),
                     };
                     keymap.insert(key, true);
@@ -47,7 +54,5 @@ fn main() {
                 _ => (),
             }
         }
-
-        Action::Continue
-    });
+    }
 }
