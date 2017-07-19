@@ -10,6 +10,7 @@ mod events;
 
 pub use support::Action;
 pub use events::Event;
+pub use glium::glutin::{ElementState, VirtualKeyCode};
 use draw::Shape;
 use glium::glutin;
 
@@ -37,6 +38,10 @@ impl Window {
             shapes: Vec::new(),
             events: Vec::new(),
         }
+    }
+
+    pub fn poll_events(&mut self) -> Vec<Event> {
+        self.events.drain(..).collect()
     }
 
     pub fn start_loop<F>(&mut self, mut callback: F)
