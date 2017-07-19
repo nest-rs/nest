@@ -9,12 +9,15 @@ fn main() {
     let mut app = Window::new("Hello World", 640, 480);
     let mut keymap: HashMap<VirtualKeyCode, bool> = HashMap::new();
 
+    let mut time = 0.0;
+
     'main: loop {
         {
             let mut frame = app.next_frame();
             frame.clear();
 
-            // let delta = frame.delta();
+            let delta = frame.delta() as f32;
+            time += delta;
 
             frame.set_color_html("312");
             frame.draw_rect((-0.5, -0.5), (0.5, 0.5));
@@ -32,7 +35,7 @@ fn main() {
             frame.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
 
             frame.set_color(1.0, 0.0, 0.0, 0.3);
-            frame.draw_circle(0.25, -0.25, 0.75, 0.25, 10);
+            frame.draw_circle(0.25 * time.sin(), -0.25 * time.cos(), 0.75, 0.25, 10);
 
             frame.finish();
         }
@@ -40,6 +43,7 @@ fn main() {
         for ev in app.poll_events() {
             use Event::*;
             use VirtualKeyCode::*;
+            
             match ev {
                 Closed => break 'main,
                 KeyboardInput(ElementState::Pressed, Some(key)) => {
