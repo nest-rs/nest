@@ -78,7 +78,7 @@ impl Window {
 			.filter(|d| d % step_size == 0)
 			.map(|d| {
 				let r = (d as f32).to_radians();
-				(r.cos() * rx, r.sin() * ry)
+				(x + r.cos() * rx, y + r.sin() * ry)
 			})
 			.collect();
 		let shape = Shape::Polygon(circle, self.color);
