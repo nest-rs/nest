@@ -17,20 +17,19 @@ pub enum Action {
     Stop,
 }
 
-fn as_sec(elapsed: Duration) -> f32 {
-    elapsed.as_secs() as f32 + elapsed.subsec_nanos() as f32 / 1000000000.0
+fn as_sec(elapsed: Duration) -> f64 {
+    elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 / 1000000000.0
 }
 
 pub fn start_loop<F>(mut callback: F)
 where
-    F: FnMut(f32) -> Action,
+    F: FnMut(f64) -> Action,
 {
-    let start = Instant::now();
-    let mut last = as_sec(start.elapsed());
+    let mut last = Instant::now();
 
     loop {
-        let curr = as_sec(start.elapsed());
-        let delta: f32 = curr - last;
+        let curr = Instant::now();
+        let delta: f64 = as_sec(curr - last);
         last = curr;
 
         match callback(delta) {

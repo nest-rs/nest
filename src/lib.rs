@@ -46,7 +46,7 @@ impl Window {
 
     pub fn start_loop<F>(&mut self, mut callback: F)
     where
-        F: FnMut(&mut Window, f32) -> support::Action,
+        F: FnMut(&mut Window, f64) -> support::Action,
     {
         let program = support::shaders::load_program(&self.display).unwrap();
         let params = glium::DrawParameters {
