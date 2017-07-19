@@ -107,7 +107,10 @@ impl Window {
             let mut events: Vec<Event> = Vec::new();
             self.events_loop.poll_events(|ev| {
                 let event = events::translate(ev);
-                events.push(event);
+                match event {
+                    Event::Unsupported => (),
+                    event => events.push(event),
+                }
             });
 
             for event in events {
