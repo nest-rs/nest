@@ -1,7 +1,7 @@
 
 extern crate glium;
 
-use super::Vertex;
+use super::vertex::color::Vertex;
 
 pub fn line_vert_buff<'a, D>(
     display: &'a D,
@@ -16,8 +16,8 @@ where
 {
     let mut shape: Vec<Vertex> = Vec::new();
 
-    shape.push(Vertex::from(x1, y1, color));
-    shape.push(Vertex::from(x2, y2, color));
+    shape.push(Vertex::new(x1, y1, color));
+    shape.push(Vertex::new(x2, y2, color));
 
     glium::VertexBuffer::new(display, &shape)
 }
@@ -32,7 +32,7 @@ where
 {
     let mut shape: Vec<Vertex> = points
         .iter()
-        .map(|point| Vertex::from(point.0, point.1, color))
+        .map(|point| Vertex::new(point.0, point.1, color))
         .collect();
     glium::VertexBuffer::new(display, &shape)
 }

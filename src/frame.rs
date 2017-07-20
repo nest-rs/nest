@@ -10,18 +10,22 @@ pub struct Frame<'a, 'b> {
 	delta: f64,
 	display: &'a glium::Display,
 	target: glium::Frame,
-	program: &'b glium::Program,
+	programs: &'b (glium::Program, glium::Program),
 }
 
 impl<'a, 'b> Frame<'a, 'b> {
-	pub fn new(display: &'a glium::Display, program: &'b glium::Program, delta: f64) -> Self {
+	pub fn new(
+		display: &'a glium::Display,
+		programs: &'b (glium::Program, glium::Program),
+		delta: f64,
+	) -> Self {
 		Frame {
 			color: [0.0; 4],
 			finished: false,
 			delta: delta,
 			display: display,
 			target: display.draw(),
-			program: program,
+			programs: programs,
 		}
 	}
 
@@ -81,7 +85,7 @@ impl<'a, 'b> Frame<'a, 'b> {
 			.draw(
 				&vert_buff,
 				&indices,
-				self.program,
+				&self.programs.0,
 				&glium::uniforms::EmptyUniforms,
 				&glium::DrawParameters {
 					blend: glium::draw_parameters::Blend::alpha_blending(),
@@ -99,7 +103,7 @@ impl<'a, 'b> Frame<'a, 'b> {
 			.draw(
 				&vert_buff,
 				&indices,
-				self.program,
+				&self.programs.0,
 				&glium::uniforms::EmptyUniforms,
 				&glium::DrawParameters {
 					blend: glium::draw_parameters::Blend::alpha_blending(),

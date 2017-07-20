@@ -20,7 +20,7 @@ use support::as_sec;
 pub struct Window {
     display: glium::Display,
     events_loop: glium::glutin::EventsLoop,
-    program: glium::Program,
+    programs: (glium::Program, glium::Program),
     last: Instant,
 }
 
@@ -32,12 +32,13 @@ impl Window {
             .with_dimensions(width, height);
         let context = glutin::ContextBuilder::new();
         let display = glium::Display::new(window, context, &events_loop).unwrap();
-        let program = support::shaders::load_program(&display).unwrap();
+        let color_program = support::shaders::color::load_program(&display).unwrap();
+        let texture_program = support::shaders::texture::load_program(&display).unwrap();
 
         Window {
             display: display,
             events_loop: events_loop,
-            program: program,
+            programs: (color_program, texture_program),
             last: Instant::now(),
         }
     }
@@ -61,6 +62,6 @@ impl Window {
         let delta = as_sec(curr - self.last);
         self.last = curr;
 
-        Frame::new(&self.display, &self.program, delta)
+        Frame::new(&self.display, &self.programs, delta)
     }
 }

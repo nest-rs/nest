@@ -5,8 +5,6 @@ pub mod shaders;
 pub mod vertex;
 pub mod buffer;
 
-pub use self::vertex::Vertex;
-
 use std::time::Duration;
 
 pub enum Action {
