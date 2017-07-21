@@ -1,8 +1,7 @@
 
-extern crate glium;
-
-use super::*;
+use glium;
 use glium::Surface;
+use support;
 
 pub struct Frame<'a, 'b> {
 	color: [f32; 4],

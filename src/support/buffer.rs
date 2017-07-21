@@ -1,8 +1,7 @@
 
-extern crate glium;
-
-use super::vertex::{color, texture};
-use super::ImageParameters;
+use glium;
+use support::vertex::{color, texture};
+use image::ImageParameters;
 
 pub fn line_vert_buff<'a, D>(
     display: &'a D,

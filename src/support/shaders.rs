@@ -1,6 +1,4 @@
 
-extern crate glium;
-
 pub mod color {
     use glium;
 

@@ -1,9 +1,5 @@
 
-extern crate glium;
-use glium::glutin;
-use glutin::{ElementState, MouseButton};
-
-use glutin::VirtualKeyCode;
+use glium::glutin::{self, ElementState, MouseButton, VirtualKeyCode, WindowEvent};
 
 pub enum Event {
 	Resized(u32, u32),
@@ -17,8 +13,6 @@ pub enum Event {
 }
 
 pub fn translate(ev: glutin::Event) -> Event {
-	use glutin::WindowEvent;
-
 	return match ev {
 		glutin::Event::WindowEvent { event, .. } => {
 			match event {

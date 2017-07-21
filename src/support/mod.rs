@@ -7,24 +7,6 @@ pub mod buffer;
 
 use std::time::Duration;
 
-pub struct ImageParameters {
-    pub dx: f32,
-    pub dy: f32,
-    pub dw: f32,
-    pub dh: f32,
-}
-
-impl Default for ImageParameters {
-    fn default() -> Self {
-        ImageParameters {
-            dx: 0.0,
-            dy: 0.0,
-            dw: 1.0,
-            dh: 1.0,
-        }
-    }
-}
-
 pub enum Action {
     Continue,
     Stop,
