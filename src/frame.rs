@@ -112,8 +112,8 @@ impl<'a, 'b> Frame<'a, 'b> {
 			.unwrap();
 	}
 
-	pub fn draw_rect(&mut self, x1: f32, y1: f32, x2: f32, y2: f32) {
-		self.draw(&vec![(x1, y1), (x1, y2), (x2, y2), (x2, y1)]);
+	pub fn draw_rect(&mut self, x: f32, y: f32, w: f32, h: f32) {
+		self.draw(&vec![(x, y), (x, y + h), (x + w, y + h), (x + w, y)]);
 	}
 
 	pub fn draw_circle(&mut self, x: f32, y: f32, rx: f32, ry: f32, step_size: u32) {
