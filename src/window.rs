@@ -53,10 +53,8 @@ impl Window {
             Ok(image) => {
                 let image = image.to_rgba();
                 let image_dimensions = image.dimensions();
-                let glimage = glium::texture::RawImage2d::from_raw_rgba_reversed(
-                    &image.into_raw(),
-                    image_dimensions,
-                );
+                let glimage =
+                    glium::texture::RawImage2d::from_raw_rgba(image.into_raw(), image_dimensions);
                 let texture = glium::texture::Texture2d::new(&self.display, glimage).unwrap();
 
                 return Ok(Image::new(image_dimensions, texture));

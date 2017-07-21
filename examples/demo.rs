@@ -21,10 +21,10 @@ fn main() {
             time += delta;
 
             frame.set_color_html("312");
-            frame.draw_rect((-0.5, -0.5), (0.5, 0.5));
+            frame.draw_rect(-0.5, -0.5, 0.5, 0.5);
 
             frame.set_color_html("#033112");
-            frame.draw_rect((0.0, 0.0), (-1.0, -1.0));
+            frame.draw_rect(0.0, 0.0, -1.0, -1.0);
 
             frame.set_color(1.0, 0.0, 0.0, 1.0);
             frame.draw_line(0.0, 0.0, 1.0, 1.0);
@@ -52,7 +52,7 @@ fn main() {
             frame.draw_image(&pic, (-0.5, 0.0), (0.5, 0.5), None);
 
             frame.set_color(0.0, 1.0, 1.0, 0.1);
-            frame.draw_rect((0.0, 0.0), (1.0, 1.0));
+            frame.draw_rect(0.0, 0.0, 1.0, 1.0);
 
             frame.finish();
         }
