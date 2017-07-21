@@ -1,6 +1,6 @@
 
 extern crate love2d;
-use love2d::{Window, Event};
+use love2d::{Window, Event, Image};
 use love2d::{ElementState, VirtualKeyCode};
 
 use std::collections::HashMap;
@@ -8,6 +8,7 @@ use std::collections::HashMap;
 fn main() {
     let mut app = Window::new("Hello World", 640, 480);
     let mut keymap: HashMap<VirtualKeyCode, bool> = HashMap::new();
+    let mut pic = app.load_image("res/city.jpg").unwrap();
 
     let mut time = 0.0;
 
@@ -37,13 +38,15 @@ fn main() {
             frame.set_color(1.0, 0.0, 0.0, 0.3);
             frame.draw_circle(0.25 * time.sin(), -0.25 * time.cos(), 0.75, 0.25, 10);
 
+            frame.draw_image(&pic, (-1.0, -1.0), (0.75, 0.75), Default::default());
+
             frame.finish();
         }
 
         for ev in app.poll_events() {
             use Event::*;
             use VirtualKeyCode::*;
-            
+
             match ev {
                 Closed => break 'main,
                 KeyboardInput(ElementState::Pressed, Some(key)) => {

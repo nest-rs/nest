@@ -133,6 +133,38 @@ impl<'a, 'b> Frame<'a, 'b> {
 		self.draw(&circle);
 	}
 
+	pub fn draw_image(
+		&mut self,
+		image: &super::Image,
+		position: (f32, f32),
+		size: (f32, f32),
+		parameters: Option<super::ImageParameters>,
+	) {
+		let vert_buff = support::buffer::image_vert_buffer(
+			self.display,
+			position.0,
+			position.1,
+			position.0 + size.0,
+			position.1 + size.1,
+			parameters.unwrap_or(Default::default()),
+		).unwrap();
+		let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
+		self.target
+			.draw(
+				&vert_buff,
+				&indices,
+				&self.programs.1,
+				&uniform! {
+					tex: image.get_texture(),
+				},
+				&glium::DrawParameters {
+					blend: glium::draw_parameters::Blend::alpha_blending(),
+					..Default::default()
+				},
+			)
+			.unwrap();
+	}
+
 	pub fn finish(mut self) {
 		let ok = self.target.finish();
 		self.finished = ok.is_ok();
