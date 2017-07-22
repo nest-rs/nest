@@ -1,5 +1,6 @@
 #![crate_name = "love2d"]
-#![warn(missing_docs)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 /*!
 love2d is a glium port of the [simple](https://crates.io/crates/simple)
