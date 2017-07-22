@@ -1,6 +1,7 @@
 
 use glium;
-use super::{Frame, Event, Image, LoadImageError};
+use super::{Frame, Event, LoadImageError};
+use image::Image;
 use glium::glutin;
 use std::path;
 use std::time::Instant;
@@ -8,6 +9,40 @@ use support::{self, as_sec};
 use events;
 use img;
 
+/**
+Represets a window with OpenGL context.
+
+This window provides image loading, rendering via `Window::next_frame(...)`,
+and events via `Window::poll_events(...)`.
+
+# Example
+```rust,no_run
+extern crate love2d;
+use love2d::{Window, Event};
+
+fn main() {
+    let mut app = Window::new("Hello World", 640, 480);
+
+    loop {
+        // Note rust requires this code to be in a closure to please the borrow checker
+        {
+            let mut frame = app.next_frame();
+            
+            // Render Code Goes Here
+
+            frame.finish();
+        }
+
+        for ev in app.poll_events() {
+            match ev {
+                Event::Closed => break,
+                _ => (),
+            }
+        }
+    }
+}
+```
+*/
 pub struct Window {
     display: glium::Display,
     events_loop: glium::glutin::EventsLoop,
@@ -16,15 +51,35 @@ pub struct Window {
 }
 
 impl Window {
+    /// Create a new Window with a Title, and size (width / height) specified in
+    /// pixels.
+    ///
+    /// # Pacnic
+    /// This method will panic if there are any issues with creating the window
+    /// or compiling the shaders. See the glium library for more specifics on
+    /// window creation.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// extern crate love2d;
+	/// # fn main() {
+    /// use love2d::Window;
+    ///
+    /// let mut app = Window::new("Hello World", 640, 480);
+	/// # }
+    /// ```
     pub fn new(title: &str, width: u32, height: u32) -> Self {
         let events_loop = glutin::EventsLoop::new();
         let window = glutin::WindowBuilder::new()
             .with_title(title)
             .with_dimensions(width, height);
         let context = glutin::ContextBuilder::new();
-        let display = glium::Display::new(window, context, &events_loop).unwrap();
-        let color_program = support::shaders::color::load_program(&display).unwrap();
-        let texture_program = support::shaders::texture::load_program(&display).unwrap();
+        let display =
+            glium::Display::new(window, context, &events_loop).expect("Could not create Display");
+        let color_program =
+            support::shaders::color::load_program(&display).expect("Could not create color shader");
+        let texture_program = support::shaders::texture::load_program(&display)
+            .expect("Could not create texture shader");
 
         Window {
             display: display,
@@ -34,6 +89,21 @@ impl Window {
         }
     }
 
+    /// Load an image from a file to be drawn by `Frame::draw_image(...)`.
+    ///
+    /// # Parameters
+    ///
+    /// * `path` - a path pointing to an image file
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// # extern crate love2d;
+	/// # fn main() {
+    /// # use love2d::Window;
+    /// let mut app = Window::new("Hello World", 640, 480);
+    /// let pic = app.load_image("res/city.jpg");
+	/// # }
+    /// ```
     pub fn load_image<'a, P: AsRef<path::Path>>(&self, path: P) -> Result<Image, LoadImageError> {
         use std::io::prelude::*;
         use std::fs::File;
@@ -63,6 +133,24 @@ impl Window {
         }
     }
 
+    /// Poll the window for events.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// # extern crate love2d;
+    /// # use love2d::Window;
+	/// # fn main() {
+    /// use love2d::Event;
+    ///
+    /// let mut app = Window::new("Hello World", 640, 480);
+    ///
+    /// for ev in app.poll_events() {
+    ///     match ev {
+    ///         _ => ()
+    ///     }
+    /// }
+	/// # }
+    /// ```
     pub fn poll_events(&mut self) -> Vec<Event> {
         let mut events: Vec<Event> = Vec::new();
 
@@ -77,6 +165,28 @@ impl Window {
         events
     }
 
+    /// Get the next frame for rendering.
+    ///
+    /// This method sets up the window and renderer for the next frame. The
+    /// `Frame` object returned includes the methods for rendering to the frame
+    /// along with delta time and window size.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// # extern crate love2d;
+    /// # use love2d::Window;
+	/// # fn main() {
+    /// let mut app = Window::new("Hello World", 640, 480);
+    ///
+    /// loop {
+    ///     let mut frame = app.next_frame();
+    /// 
+    ///     // Render code goes here
+    /// 
+    ///     frame.finish();
+    /// }
+	/// # }
+    /// ```
     pub fn next_frame(&mut self) -> Frame {
         let curr = Instant::now();
         let delta = as_sec(curr - self.last);
