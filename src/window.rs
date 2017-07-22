@@ -68,7 +68,7 @@ impl Window {
     /// let mut app = Window::new("Hello World", 640, 480);
 	/// # }
     /// ```
-    pub fn new(title: &str, width: u32, height: u32) -> Self {
+    pub fn new<S: Into<String>>(title: S, width: u32, height: u32) -> Self {
         let events_loop = glutin::EventsLoop::new();
         let window = glutin::WindowBuilder::new()
             .with_title(title)
