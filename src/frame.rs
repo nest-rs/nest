@@ -109,9 +109,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate love2d;
+	/// # extern crate simple;
 	/// # fn main() {
-	/// # use love2d::Window;
+	/// # use simple::Window;
 	/// # let mut app = Window::new("draw_rect Example", 300, 200);
 	/// # let mut frame = app.next_frame();
 	/// frame.draw(&[(0.0, 0.0), (0.2, 0.3), (0.3, 0.2)]);
@@ -140,9 +140,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate love2d;
+	/// # extern crate simple;
 	/// # fn main() {
-	/// # use love2d::Window;
+	/// # use simple::Window;
 	/// # let mut app = Window::new("draw_rect Example", 300, 200);
 	/// # let mut frame = app.next_frame();
 	/// frame.draw_rect(-0.2, -0.3, 1.0, 1.0);
@@ -158,9 +158,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate love2d;
+	/// # extern crate simple;
 	/// # fn main() {
-	/// # use love2d::Window;
+	/// # use simple::Window;
 	/// # let mut app = Window::new("draw_circle Example", 300, 200);
 	/// # let mut frame = app.next_frame();
 	/// frame.draw_circle(0.25, -0.25, 0.75, 0.25, 10);
@@ -182,9 +182,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate love2d;
+	/// # extern crate simple;
 	/// # fn main() {
-	/// # use love2d::Window;
+	/// # use simple::Window;
 	/// # let mut app = Window::new("draw_circle Example", 300, 200);
 	/// let pic = app.load_image("image.jpg").unwrap();
 	///

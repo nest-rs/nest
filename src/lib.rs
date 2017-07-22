@@ -1,18 +1,18 @@
-#![crate_name = "love2d"]
+#![crate_name = "simple"]
 #![deny(missing_docs)]
 #![deny(warnings)]
 
 /*!
-love2d is a glium port of the [simple](https://crates.io/crates/simple)
-crate which is a port of the [Love2D](https://love2d.org/) lua graphics
+simple is a glium port of the [simple](https://crates.io/crates/simple)
+crate which is a port of the [simple](https://simple.org/) lua graphics
 library. This library was developed as a 2D graphics prototyping library and
 is not ment for high-performance.
 
 # Example
 
 ```rust,no_run
-extern crate love2d;
-use love2d::{Window, Event};
+extern crate simple;
+use simple::{Window, Event};
 
 fn main() {
 	let mut app = Window::new("Window Example", 640, 480);

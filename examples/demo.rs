@@ -1,7 +1,7 @@
 
-extern crate love2d;
-use love2d::{Window, Event, ImageParameters};
-use love2d::{ElementState, VirtualKeyCode};
+extern crate simple;
+use simple::{Window, Event, ImageParameters};
+use simple::{ElementState, VirtualKeyCode};
 
 use std::collections::HashMap;
 

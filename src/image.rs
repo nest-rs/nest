@@ -20,9 +20,9 @@ impl Default for ImageParameters {
     /// The default crop which is the entire image
     ///
     /// ```rust,no_run
-    /// # extern crate love2d;
+    /// # extern crate simple;
     /// # fn main() {
-    /// # use love2d::ImageParameters;
+    /// # use simple::ImageParameters;
     /// # let params =
     /// ImageParameters {
     ///     dx: 0.0,

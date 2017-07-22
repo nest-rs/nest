@@ -1,6 +1,6 @@
 
-extern crate love2d;
-use love2d::{Window, Event};
+extern crate simple;
+use simple::{Window, Event};
 
 fn main() {
 	let mut app = Window::new("Window Example", 640, 480);

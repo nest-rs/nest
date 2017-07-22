@@ -17,8 +17,8 @@ and events via `Window::poll_events(...)`.
 
 # Example
 ```rust,no_run
-extern crate love2d;
-use love2d::{Window, Event};
+extern crate simple;
+use simple::{Window, Event};
 
 fn main() {
     let mut app = Window::new("Hello World", 640, 480);
@@ -61,9 +61,9 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// extern crate love2d;
+    /// extern crate simple;
 	/// # fn main() {
-    /// use love2d::Window;
+    /// use simple::Window;
     ///
     /// let mut app = Window::new("Hello World", 640, 480);
 	/// # }
@@ -97,9 +97,9 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate love2d;
+    /// # extern crate simple;
 	/// # fn main() {
-    /// # use love2d::Window;
+    /// # use simple::Window;
     /// let mut app = Window::new("Hello World", 640, 480);
     /// let pic = app.load_image("res/city.jpg");
 	/// # }
@@ -137,10 +137,10 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate love2d;
-    /// # use love2d::Window;
+    /// # extern crate simple;
+    /// # use simple::Window;
 	/// # fn main() {
-    /// use love2d::Event;
+    /// use simple::Event;
     ///
     /// let mut app = Window::new("Hello World", 640, 480);
     ///
@@ -173,8 +173,8 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate love2d;
-    /// # use love2d::Window;
+    /// # extern crate simple;
+    /// # use simple::Window;
 	/// # fn main() {
     /// let mut app = Window::new("Hello World", 640, 480);
     ///

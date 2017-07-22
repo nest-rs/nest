@@ -1,6 +1,6 @@
 [package]
 authors = ["Thomas Harrison <twh2898@vt.edu>"]
-name = "love2d"
+name = "simple"
 version = "0.1.0"
 
 [dependencies]
