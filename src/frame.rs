@@ -3,6 +3,7 @@ use glium;
 use glium::Surface;
 use support;
 use image::Image;
+use shapes::{Shape, Rectangle};
 
 /**
 Represents a single frame in the render loop. 
@@ -118,7 +119,7 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// # frame.finish();
 	/// # }
 	/// ```
-	pub fn draw(&mut self, points: &[(f32, f32)]) {
+	pub fn draw(&mut self, points: &[(f64, f64)]) {
 		let vert_buff =
 			support::buffer::poly_vert_buffer(self.display, &points, self.color).unwrap();
 		let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
@@ -136,6 +137,31 @@ impl<'a, 'b> Frame<'a, 'b> {
 			.unwrap();
 	}
 
+	/// Draw a struct that implements the `Shape` trait.
+	///
+	/// The object will be draw as a triangle fan with the current foreground color.
+	///
+	/// # Example
+	/// ```rust,no_run
+	/// # extern crate simple;
+	/// # fn main() {
+	/// # use simple::{Window, Circle};
+	/// # let mut app = Window::new("draw_rect Example", 300, 200);
+	/// # let mut frame = app.next_frame();
+	/// frame.draw_shape(Circle {
+	/// 	x: 0.25,
+	/// 	y: -0.25,
+	/// 	rx: 0.75,
+	/// 	ry: 0.25,
+	/// 	step_size: 10,
+	/// });
+	/// # frame.finish();
+	/// # }
+	/// ```
+	pub fn draw_shape<S: Shape>(&mut self, shape: S) {
+		self.draw(&shape.to_points());
+	}
+
 	/// Draw a rectangle from `x, y, width, height` parameters.
 	///
 	/// # Example
@@ -149,33 +175,8 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// # frame.finish();
 	/// # }
 	/// ```
-	pub fn draw_rect(&mut self, x: f32, y: f32, w: f32, h: f32) {
+	pub fn draw_rect(&mut self, x: f64, y: f64, w: f64, h: f64) {
 		self.draw(&vec![(x, y), (x, y + h), (x + w, y + h), (x + w, y)]);
-	}
-
-	/// Draw a circle with center point `x, y` width `rx`, height `ry`, and a
-	/// verticy every `step_size` degrees.
-	///
-	/// # Example
-	/// ```rust,no_run
-	/// # extern crate simple;
-	/// # fn main() {
-	/// # use simple::Window;
-	/// # let mut app = Window::new("draw_circle Example", 300, 200);
-	/// # let mut frame = app.next_frame();
-	/// frame.draw_circle(0.25, -0.25, 0.75, 0.25, 10);
-	/// # frame.finish();
-	/// # }
-	/// ```
-	pub fn draw_circle(&mut self, x: f32, y: f32, rx: f32, ry: f32, step_size: u32) {
-		let circle: Vec<(f32, f32)> = (0u32..360)
-			.filter(|d| d % step_size == 0)
-			.map(|d| {
-				let r = (d as f32).to_radians();
-				(x + r.cos() * rx, y + r.sin() * ry)
-			})
-			.collect();
-		self.draw(&circle);
 	}
 
 	/// Draw an image with location `x, y, width, height` and croppinc specified by `parameters`.
@@ -184,30 +185,36 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// ```rust,no_run
 	/// # extern crate simple;
 	/// # fn main() {
-	/// # use simple::Window;
+	/// # use simple::{Window, Rectangle};
 	/// # let mut app = Window::new("draw_circle Example", 300, 200);
 	/// let pic = app.load_image("image.jpg").unwrap();
 	///
 	/// # let mut frame = app.next_frame();
-	/// frame.draw_image(&pic, 0.0, 0.0, 1.0, 1.0, Default::default());
+	/// frame.draw_image(
+	/// 	&pic,
+	/// 	Rectangle {
+	/// 		x: -0.5,
+	/// 		y: 0.0,
+	/// 		w: 0.5,
+	/// 		h: 0.5,
+	/// 	},
+	/// 	Default::default(),
+	/// );
 	/// # frame.finish();
 	/// # }
 	/// ```
 	pub fn draw_image(
 		&mut self,
 		image: &Image,
-		x: f32, 
-		y: f32,
-		w: f32, 
-		h: f32,
+		rect: Rectangle,
 		parameters: super::ImageParameters,
 	) {
 		let vert_buff = support::buffer::image_vert_buffer(
 			self.display,
-			x,
-			y,
-			x + w,
-			y + h,
+			rect.x,
+			rect.y,
+			rect.x + rect.w,
+			rect.y + rect.h,
 			parameters,
 		).unwrap();
 		let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);

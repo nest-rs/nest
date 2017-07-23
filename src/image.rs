@@ -7,13 +7,13 @@ use std::{io, error, fmt};
 /// `Frame::draw_image(...)`
 pub struct ImageParameters {
     /// U or X location on the texture on the range `0.0 - 1.0`
-    pub dx: f32,
+    pub dx: f64,
     /// V or Y location on the texture on the range `0.0 - 1.0`
-    pub dy: f32,
+    pub dy: f64,
     /// U width on the texture on the range `0.0 - 1.0`
-    pub dw: f32,
+    pub dw: f64,
     /// V height on the texture on the range `0.0 - 1.0`
-    pub dh: f32,
+    pub dh: f64,
 }
 
 impl Default for ImageParameters {

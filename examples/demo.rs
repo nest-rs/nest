@@ -1,6 +1,7 @@
 
 extern crate simple;
 use simple::{Window, Event, ImageParameters};
+use simple::{Rectangle, Circle};
 use simple::{ElementState, VirtualKeyCode};
 
 use std::collections::HashMap;
@@ -17,7 +18,7 @@ fn main() {
             let mut frame = app.next_frame();
             frame.clear();
 
-            let delta = frame.delta() as f32;
+            let delta = frame.delta();
             time += delta;
 
             frame.set_color_html("312");
@@ -33,14 +34,22 @@ fn main() {
             frame.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
 
             frame.set_color(1.0, 0.0, 0.0, 0.3);
-            frame.draw_circle(0.25 * time.sin(), -0.25 * time.cos(), 0.75, 0.25, 10);
+            frame.draw_shape(Circle {
+                x: 0.25 * time.sin(),
+                y: -0.25 * time.cos(),
+                rx: 0.75,
+                ry: 0.25,
+                step_size: 10,
+            });
 
             frame.draw_image(
                 &pic,
-                -1.0,
-                0.0,
-                1.0,
-                1.0,
+                Rectangle {
+                    x: -1.0,
+                    y: 0.0,
+                    w: 1.0,
+                    h: 1.0,
+                },
                 ImageParameters {
                     dx: 0.3,
                     dy: 0.0,
@@ -48,7 +57,16 @@ fn main() {
                     dh: 1.0,
                 },
             );
-            frame.draw_image(&pic, -0.5, 0.0, 0.5, 0.5, Default::default());
+            frame.draw_image(
+                &pic,
+                Rectangle {
+                    x: -0.5,
+                    y: 0.0,
+                    w: 0.5,
+                    h: 0.5,
+                },
+                Default::default(),
+            );
 
             frame.set_color(0.0, 1.0, 1.0, 0.1);
             frame.draw_rect(0.0, 0.0, 1.0, 1.0);

@@ -12,7 +12,7 @@ pub enum Event {
 	/// Keyboard event with key state
 	KeyboardInput(ElementState, Option<VirtualKeyCode>),
 	/// Mouse move event `(x, y)`
-	MouseMoved(f32, f32),
+	MouseMoved(f64, f64),
 	/// Mouse button event with button state
 	MouseInput(ElementState, MouseButton),
 	/// Mouse wheel event with delta value
@@ -32,7 +32,7 @@ pub fn translate(ev: glutin::Event) -> Event {
 					Event::KeyboardInput(input.state, input.virtual_keycode)
 				}
 				WindowEvent::MouseMoved { position, .. } => {
-					Event::MouseMoved(position.0 as f32, position.1 as f32)
+					Event::MouseMoved(position.0, position.1)
 				}
 				WindowEvent::MouseInput { state, button, .. } => Event::MouseInput(state, button),
 				WindowEvent::MouseWheel { delta, .. } => {

@@ -5,7 +5,7 @@ use image::ImageParameters;
 
 pub fn poly_vert_buffer<'a, D>(
     display: &'a D,
-    points: &[(f32, f32)],
+    points: &[(f64, f64)],
     color: [f32; 4],
 ) -> Result<glium::VertexBuffer<color::Vertex>, glium::vertex::BufferCreationError>
 where
@@ -20,10 +20,10 @@ where
 
 pub fn image_vert_buffer<'a, D>(
     display: &'a D,
-    x1: f32,
-    y1: f32,
-    x2: f32,
-    y2: f32,
+    x1: f64,
+    y1: f64,
+    x2: f64,
+    y2: f64,
     params: ImageParameters,
 ) -> Result<glium::VertexBuffer<texture::Vertex>, glium::vertex::BufferCreationError>
 where
