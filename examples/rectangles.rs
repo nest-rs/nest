@@ -1,6 +1,6 @@
 
-extern crate simple;
-use simple::{Window, Event, Rectangle, Circle};
+extern crate nest;
+use nest::{Window, Event, Rectangle, Circle};
 
 fn main() {
 	let mut app = Window::new("Window Example", 640, 480);

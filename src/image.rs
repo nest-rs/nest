@@ -20,9 +20,9 @@ impl Default for ImageParameters {
     /// The default crop which is the entire image
     ///
     /// ```rust,no_run
-    /// # extern crate simple;
+    /// # extern crate nest;
     /// # fn main() {
-    /// # use simple::ImageParameters;
+    /// # use nest::ImageParameters;
     /// # let params =
     /// ImageParameters {
     ///     dx: 0.0,

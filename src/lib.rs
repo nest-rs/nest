@@ -1,18 +1,18 @@
-#![crate_name = "simple"]
+#![crate_name = "nest"]
 #![deny(missing_docs)]
 #![deny(warnings)]
 
 /*!
-simple is a glium port of the [simple](https://crates.io/crates/simple)
-crate which is a port of the [simple](https://simple.org/) lua graphics
+nest is a glium port of the [nest](https://crates.io/crates/nest)
+crate which is a port of the [nest](https://nest.org/) lua graphics
 library. This library was developed as a 2D graphics prototyping library and
 is not ment for high-performance.
 
 # Example
 
 ```rust,no_run
-extern crate simple;
-use simple::{Window, Event};
+extern crate nest;
+use nest::{Window, Event};
 
 fn main() {
 	let mut app = Window::new("Window Example", 640, 480);

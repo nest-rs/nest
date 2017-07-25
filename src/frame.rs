@@ -110,9 +110,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate simple;
+	/// # extern crate nest;
 	/// # fn main() {
-	/// # use simple::Window;
+	/// # use nest::Window;
 	/// # let mut app = Window::new("draw_rect Example", 300, 200);
 	/// # let mut frame = app.next_frame();
 	/// frame.draw(&[(0.0, 0.0), (0.2, 0.3), (0.3, 0.2)]);
@@ -143,9 +143,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate simple;
+	/// # extern crate nest;
 	/// # fn main() {
-	/// # use simple::{Window, Circle};
+	/// # use nest::{Window, Circle};
 	/// # let mut app = Window::new("draw_rect Example", 300, 200);
 	/// # let mut frame = app.next_frame();
 	/// frame.draw_shape(Circle {
@@ -166,9 +166,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate simple;
+	/// # extern crate nest;
 	/// # fn main() {
-	/// # use simple::Window;
+	/// # use nest::Window;
 	/// # let mut app = Window::new("draw_rect Example", 300, 200);
 	/// # let mut frame = app.next_frame();
 	/// frame.draw_rect(-0.2, -0.3, 1.0, 1.0);
@@ -183,9 +183,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// # Example
 	/// ```rust,no_run
-	/// # extern crate simple;
+	/// # extern crate nest;
 	/// # fn main() {
-	/// # use simple::{Window, Rectangle};
+	/// # use nest::{Window, Rectangle};
 	/// # let mut app = Window::new("draw_circle Example", 300, 200);
 	/// let pic = app.load_image("image.jpg").unwrap();
 	///

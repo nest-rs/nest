@@ -1,8 +1,8 @@
 
-extern crate simple;
-use simple::{Window, Event, ImageParameters};
-use simple::{Rectangle, Circle};
-use simple::{ElementState, VirtualKeyCode};
+extern crate nest;
+use nest::{Window, Event, ImageParameters};
+use nest::{Rectangle, Circle};
+use nest::{ElementState, VirtualKeyCode};
 
 use std::collections::HashMap;
 

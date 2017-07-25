@@ -17,8 +17,8 @@ and events via `Window::poll_events(...)`.
 
 # Example
 ```rust,no_run
-extern crate simple;
-use simple::{Window, Event};
+extern crate nest;
+use nest::{Window, Event};
 
 fn main() {
     let mut app = Window::new("Hello World", 640, 480);
@@ -61,9 +61,9 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// extern crate simple;
+    /// extern crate nest;
 	/// # fn main() {
-    /// use simple::Window;
+    /// use nest::Window;
     ///
     /// let mut app = Window::new("Hello World", 640, 480);
 	/// # }
@@ -97,9 +97,9 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate simple;
+    /// # extern crate nest;
 	/// # fn main() {
-    /// # use simple::Window;
+    /// # use nest::Window;
     /// let mut app = Window::new("Hello World", 640, 480);
     /// let pic = app.load_image("res/city.jpg");
 	/// # }
@@ -137,10 +137,10 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate simple;
-    /// # use simple::Window;
+    /// # extern crate nest;
+    /// # use nest::Window;
 	/// # fn main() {
-    /// use simple::Event;
+    /// use nest::Event;
     ///
     /// let mut app = Window::new("Hello World", 640, 480);
     ///
@@ -173,8 +173,8 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate simple;
-    /// # use simple::Window;
+    /// # extern crate nest;
+    /// # use nest::Window;
 	/// # fn main() {
     /// let mut app = Window::new("Hello World", 640, 480);
     ///
