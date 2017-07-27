@@ -1,9 +1,9 @@
 
 use glium;
 use glium::Surface;
-use support;
 use image::Image;
-use shapes::{Shape, Rectangle};
+use shapes::{Shape, Rectangle, ColorRectangle, ImageRectangle};
+use support::shaders::ShaderMode;
 
 /**
 Represents a single frame in the render loop. 
@@ -16,9 +16,6 @@ frame enherit `Alpha Blend` transparencies.
 See the example `examples/demo.rs` for a complete example.
 */
 pub struct Frame<'a, 'b> {
-	color: [f32; 4],
-	finished: bool,
-	delta: f64,
 	display: &'a glium::Display,
 	target: glium::Frame,
 	programs: &'b (glium::Program, glium::Program),
@@ -30,21 +27,12 @@ impl<'a, 'b> Frame<'a, 'b> {
 	pub fn new(
 		display: &'a glium::Display,
 		programs: &'b (glium::Program, glium::Program),
-		delta: f64,
 	) -> Self {
 		Frame {
-			color: [0.0; 4],
-			finished: false,
-			delta: delta,
 			display: display,
 			target: display.draw(),
 			programs: programs,
 		}
-	}
-
-	/// Get the delta time since the last frame in decimal seconds.
-	pub fn delta(&self) -> f64 {
-		self.delta
 	}
 
 	/// Clear the frame to black `(0.0, 0.0, 0.0, 1.0)`
@@ -55,51 +43,6 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// Clear the frame to the specified color
 	pub fn clear_to_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
 		self.target.clear_color(red, green, blue, alpha);
-	}
-
-	/// Set the foreground color for future draw calls. This does not effect
-	/// `draw_image`.
-	pub fn set_color(&mut self, red: f32, green: f32, blue: f32, alpha: f32) {
-		self.color = [red, green, blue, alpha];
-	}
-
-	/// Set the color using a 3 or 6 character HTML color string
-	///
-	/// # Examples
-	/// `"#333"`
-	/// `"F25"`
-	/// `"3E59F4"`
-	/// `"#45F0D5"`
-	pub fn set_color_html(&mut self, color: &str) {
-		let mut bytes = color.as_bytes();
-		if bytes[0] == b'#' {
-			bytes = &bytes[1..];
-		}
-
-		use std::str::from_utf8;
-		use std::u8;
-
-		if bytes.len() == 3 {
-			let r = u8::from_str_radix(from_utf8(&vec![bytes[0], bytes[0]]).unwrap(), 16).unwrap();
-			let g = u8::from_str_radix(from_utf8(&vec![bytes[1], bytes[1]]).unwrap(), 16).unwrap();
-			let b = u8::from_str_radix(from_utf8(&vec![bytes[2], bytes[2]]).unwrap(), 16).unwrap();
-			self.set_color(
-				(r as f32) / 255.0,
-				(g as f32) / 255.0,
-				(b as f32) / 255.0,
-				1.0,
-			);
-		} else if bytes.len() == 6 {
-			let r = u8::from_str_radix(from_utf8(&bytes[0..2]).unwrap(), 16).unwrap();
-			let g = u8::from_str_radix(from_utf8(&bytes[2..4]).unwrap(), 16).unwrap();
-			let b = u8::from_str_radix(from_utf8(&bytes[4..6]).unwrap(), 16).unwrap();
-			self.set_color(
-				(r as f32) / 255.0,
-				(g as f32) / 255.0,
-				(b as f32) / 255.0,
-				1.0,
-			);
-		}
 	}
 
 	/// Draw a set of points as a `Triangle Fan`. 
@@ -119,11 +62,11 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// # frame.finish();
 	/// # }
 	/// ```
-	pub fn draw(&mut self, points: &[(f64, f64)]) {
-		let vert_buff =
-			support::buffer::poly_vert_buffer(self.display, &points, self.color).unwrap();
+	pub fn draw<V: glium::Vertex>(&mut self, points: &[V], mode: ShaderMode) {
+		let vert_buff = glium::VertexBuffer::new(self.display, &points).unwrap();
 		let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
-		self.target
+		match mode {
+			ShaderMode::Color => self.target
 			.draw(
 				&vert_buff,
 				&indices,
@@ -134,7 +77,22 @@ impl<'a, 'b> Frame<'a, 'b> {
 					..Default::default()
 				},
 			)
-			.unwrap();
+			.unwrap(),
+			ShaderMode::Texture(image) => self.target
+			.draw(
+				&vert_buff,
+				&indices,
+				&self.programs.1,
+				&uniform! {
+					tex: image.get_texture(),
+				},
+				&glium::DrawParameters {
+					blend: glium::draw_parameters::Blend::alpha_blending(),
+					..Default::default()
+				},
+			)
+			.unwrap(),
+		}
 	}
 
 	/// Draw a struct that implements the `Shape` trait.
@@ -158,8 +116,8 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// # frame.finish();
 	/// # }
 	/// ```
-	pub fn draw_shape<S: Shape>(&mut self, shape: S) {
-		self.draw(&shape.to_points());
+	pub fn draw_shape<V: glium::Vertex, S: Shape<V>>(&mut self, shape: &S) {
+		self.draw(&shape.points(), shape.shader_mode());
 	}
 
 	/// Draw a rectangle from `x, y, width, height` parameters.
@@ -175,8 +133,14 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// # frame.finish();
 	/// # }
 	/// ```
-	pub fn draw_rect(&mut self, x: f64, y: f64, w: f64, h: f64) {
-		self.draw(&vec![(x, y), (x, y + h), (x + w, y + h), (x + w, y)]);
+	pub fn draw_rect(&mut self, x: f64, y: f64, w: f64, h: f64, color: [f32; 4]) {
+		self.draw_shape(&ColorRectangle {
+			x: x,
+			y: y,
+			w: w,
+			h: h,
+			color: color,
+		});
 	}
 
 	/// Draw an image with location `x, y, width, height` and croppinc specified by `parameters`.
@@ -207,31 +171,9 @@ impl<'a, 'b> Frame<'a, 'b> {
 		&mut self,
 		image: &Image,
 		rect: Rectangle,
-		parameters: super::ImageParameters,
+		crop: Option<Rectangle>
 	) {
-		let vert_buff = support::buffer::image_vert_buffer(
-			self.display,
-			rect.x,
-			rect.y,
-			rect.x + rect.w,
-			rect.y + rect.h,
-			parameters,
-		).unwrap();
-		let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
-		self.target
-			.draw(
-				&vert_buff,
-				&indices,
-				&self.programs.1,
-				&uniform! {
-					tex: image.get_texture(),
-				},
-				&glium::DrawParameters {
-					blend: glium::draw_parameters::Blend::alpha_blending(),
-					..Default::default()
-				},
-			)
-			.unwrap();
+		self.draw_shape(&ImageRectangle::from((rect, crop, image)));
 	}
 
 	/// Finish drawing the frame and push it to the screen.
@@ -241,8 +183,7 @@ impl<'a, 'b> Frame<'a, 'b> {
 	///
 	/// **Note**: no draw draw methods may be called on the current frame after
 	/// this method is called.
-	pub fn finish(mut self) {
-		let ok = self.target.finish();
-		self.finished = ok.is_ok();
+	pub fn finish(self) {
+		self.target.finish().unwrap();
 	}
 }

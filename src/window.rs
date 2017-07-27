@@ -4,8 +4,7 @@ use super::{Frame, Event, LoadImageError};
 use image::Image;
 use glium::glutin;
 use std::path;
-use std::time::Instant;
-use support::{self, as_sec};
+use support;
 use events;
 use img;
 
@@ -47,7 +46,6 @@ pub struct Window {
     display: glium::Display,
     events_loop: glium::glutin::EventsLoop,
     programs: (glium::Program, glium::Program),
-    last: Instant,
 }
 
 impl Window {
@@ -85,7 +83,6 @@ impl Window {
             display: display,
             events_loop: events_loop,
             programs: (color_program, texture_program),
-            last: Instant::now(),
         }
     }
 
@@ -188,10 +185,6 @@ impl Window {
 	/// # }
     /// ```
     pub fn next_frame(&mut self) -> Frame {
-        let curr = Instant::now();
-        let delta = as_sec(curr - self.last);
-        self.last = curr;
-
-        Frame::new(&self.display, &self.programs, delta)
+        Frame::new(&self.display, &self.programs)
     }
 }

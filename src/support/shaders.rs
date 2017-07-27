@@ -1,4 +1,11 @@
 
+use image;
+
+pub enum ShaderMode<'a> {
+    Color,
+    Texture(&'a image::Image),
+}
+
 pub mod color {
     use glium;
 
