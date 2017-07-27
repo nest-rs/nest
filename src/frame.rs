@@ -134,13 +134,12 @@ impl<'a, 'b> Frame<'a, 'b> {
 	/// # }
 	/// ```
 	pub fn draw_rect(&mut self, x: f64, y: f64, w: f64, h: f64, color: [f32; 4]) {
-		self.draw_shape(&ColorRectangle {
+		self.draw_shape(&ColorRectangle::new(Rectangle {
 			x: x,
 			y: y,
 			w: w,
 			h: h,
-			color: color,
-		});
+		}, color));
 	}
 
 	/// Draw an image with location `x, y, width, height` and croppinc specified by `parameters`.

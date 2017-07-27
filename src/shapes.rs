@@ -15,6 +15,25 @@ where
 	fn shader_mode(&self) -> ShaderMode {
 		ShaderMode::Color
 	}
+	/// Get the transforms for the shape
+	fn transforms(&self) -> &[Transform];
+}
+
+/// Methods for transforming a Shape
+pub trait Transformer
+{
+	/// Rotate the current shape
+	fn rotate(&mut self, angle: f64);
+	/// Move the current shape
+	fn translate(&mut self, x: f64, y: f64);
+}
+
+/// Represents a single transform (rotate | translate)
+pub enum Transform {
+	/// Represents a rotation in radians
+	Rotate(f64),
+	/// Represents a translation in x, y space
+	Translate(f64, f64),
 }
 
 /// A rectangle that does not implement shape.
@@ -39,6 +58,7 @@ impl Default for Rectangle {
 		}
 	}
 }
+
 /// Represents a textured rectangle
 pub struct ImageRectangle<'a> {
 	/// X component
@@ -61,6 +81,39 @@ pub struct ImageRectangle<'a> {
 
 	/// Texture image
 	pub texture: &'a Image,
+	transforms: Vec<Transform>,
+}
+
+impl<'a> ImageRectangle<'a> {
+	/// Creates a new Image Rectangle
+	pub fn new(pos: Rectangle, image: &'a Image) -> Self {
+		ImageRectangle {
+			x: pos.x,
+			y: pos.y,
+			w: pos.w,
+			h: pos.h,
+
+			dx: 0.0,
+			dy: 0.0,
+			dw: 1.0,
+			dh: 1.0,
+
+			texture: image,
+			transforms: Vec::new(),
+		}
+	}
+
+	/// Crops the image. If none, the crop is removed
+	pub fn with_crop(self, crop: Option<Rectangle>) -> Self {
+		let crop = crop.unwrap_or(Default::default());
+		ImageRectangle {
+			dx: crop.x,
+			dy: crop.y,
+			dw: crop.w,
+			dh: crop.h,
+			..self
+		}
+	}
 }
 
 impl<'a> Shape<texture::Vertex> for ImageRectangle<'a> {
@@ -81,6 +134,20 @@ impl<'a> Shape<texture::Vertex> for ImageRectangle<'a> {
 	fn shader_mode(&self) -> ShaderMode {
 		ShaderMode::Texture(self.texture)
 	}
+
+	fn transforms(&self) -> &[Transform] {
+		&self.transforms
+	}
+}
+
+impl<'a> Transformer for ImageRectangle<'a> {
+	fn rotate(&mut self, angle: f64) {
+		self.transforms.push(Transform::Rotate(angle));
+	}
+
+	fn translate(&mut self, x: f64, y: f64) {
+		self.transforms.push(Transform::Translate(x, y));
+	}
 }
 
 impl<'a> From<(Rectangle, Option<Rectangle>, &'a Image)> for ImageRectangle<'a> {
@@ -89,19 +156,7 @@ impl<'a> From<(Rectangle, Option<Rectangle>, &'a Image)> for ImageRectangle<'a> 
 		let crop = parts.1.unwrap_or(Default::default());
 		let image = parts.2;
 
-		ImageRectangle {
-			x: pos.x,
-			y: pos.y,
-			w: pos.w,
-			h: pos.h,
-
-			dx: crop.x,
-			dy: crop.y,
-			dw: crop.w,
-			dh: crop.h,
-
-			texture: image,
-		}
+		ImageRectangle::new(pos, image).with_crop(Some(crop))
 	}
 }
 
@@ -117,6 +172,21 @@ pub struct ColorRectangle {
 	pub h: f64,
 	/// The color fo the rectangle
 	pub color: [f32; 4],
+	transforms: Vec<Transform>,
+}
+
+impl ColorRectangle {
+	/// Creates a new ColorRectangle bounded by `rect` dimensions and with color.
+	pub fn new(rect: Rectangle, color: [f32; 4]) -> Self {
+		ColorRectangle {
+			x: rect.x,
+			y: rect.y,
+			w: rect.w,
+			h: rect.h,
+			color: color,
+			transforms: Vec::new(),
+		}
+	}
 }
 
 impl Shape<color::Vertex> for ColorRectangle {
@@ -128,6 +198,20 @@ impl Shape<color::Vertex> for ColorRectangle {
 			color::Vertex::new(self.x, self.y + self.h, self.color),
 		]
 	}
+
+	fn transforms(&self) -> &[Transform] {
+		&self.transforms
+	}
+}
+
+impl Transformer for ColorRectangle {
+	fn rotate(&mut self, angle: f64) {
+		self.transforms.push(Transform::Rotate(angle));
+	}
+
+	fn translate(&mut self, x: f64, y: f64) {
+		self.transforms.push(Transform::Translate(x, y));
+	}
 }
 
 impl From<(Rectangle, [f32; 4])> for ColorRectangle {
@@ -135,13 +219,7 @@ impl From<(Rectangle, [f32; 4])> for ColorRectangle {
 		let pos = parts.0;
 		let color = parts.1;
 
-		ColorRectangle {
-			x: pos.x,
-			y: pos.y,
-			w: pos.w,
-			h: pos.h,
-			color: color,
-		}
+		ColorRectangle::new(pos, color)
 	}
 }
 
@@ -159,6 +237,22 @@ pub struct Circle {
 	pub step_size: u32,
 	/// The color of the oval
 	pub color: [f32; 4],
+	transforms: Vec<Transform>,
+}
+
+impl Circle {
+	/// Create a new Circle bounded by `rect` and with step_size and color
+	pub fn new(rect: Rectangle, step_size: u32, color: [f32; 4]) -> Self {
+		Circle {
+			x: rect.x,
+			y: rect.y,
+			rx: rect.w,
+			ry: rect.h,
+			step_size: step_size,
+			color: color,
+			transforms: Vec::new(),
+		}
+	}
 }
 
 impl Shape<color::Vertex> for Circle {
@@ -174,5 +268,19 @@ impl Shape<color::Vertex> for Circle {
 				)
 			})
 			.collect()
+	}
+
+	fn transforms(&self) -> &[Transform] {
+		&self.transforms
+	}
+}
+
+impl Transformer for Circle {
+	fn rotate(&mut self, angle: f64) {
+		self.transforms.push(Transform::Rotate(angle));
+	}
+
+	fn translate(&mut self, x: f64, y: f64) {
+		self.transforms.push(Transform::Translate(x, y));
 	}
 }
