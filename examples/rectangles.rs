@@ -1,6 +1,6 @@
 
 extern crate nest;
-use nest::{Window, Event, Rectangle, Circle};
+use nest::{Window, Event, ColorRectangle};
 
 fn main() {
 	let mut app = Window::new("Window Example", 640, 480);
@@ -10,33 +10,17 @@ fn main() {
 			let mut frame = app.next_frame();
 			frame.clear();
 
-			frame.set_color(1.0, 0.0, 0.0, 1.0);
-			frame.draw_rect(0.0, 0.0, 1.0, 1.0);
+			frame.draw_rect(0.0, 0.0, 1.0, 1.0, [1.0, 0.0, 0.0, 1.0]);
+			frame.draw_rect(0.0, 0.0, -1.0, 1.0, [0.0, 1.0, 0.0, 1.0]);
+			frame.draw_rect(0.0, 0.0, 1.0, -1.0, [0.0, 0.0, 1.0, 1.0]);
+			frame.draw_rect(0.0, 0.0, -1.0, -1.0, [1.0, 1.0, 1.0, 1.0]);
 
-			frame.set_color(0.0, 1.0, 0.0, 1.0);
-			frame.draw_rect(0.0, 0.0, -1.0, 1.0);
-
-			frame.set_color(0.0, 0.0, 1.0, 1.0);
-			frame.draw_rect(0.0, 0.0, 1.0, -1.0);
-
-			frame.set_color(1.0, 1.0, 1.0, 1.0);
-			frame.draw_rect(0.0, 0.0, -1.0, -1.0);
-
-			frame.set_color(0.0, 0.2, 0.5, 1.0);
-			frame.draw_shape(Rectangle {
+			frame.draw_shape(&ColorRectangle {
 				x: -0.5,
 				y: -0.5,
 				w: 1.0,
 				h: 1.0,
-			});
-
-			frame.set_color(0.5, 0.2, 0.0, 1.0);
-			frame.draw_shape(Circle {
-				x: 0.0,
-				y: 0.0,
-				rx: 0.2,
-				ry: 0.2,
-				step_size: 10,
+				color: [0.0, 0.2, 0.5, 0.7]
 			});
 
 			frame.finish();
