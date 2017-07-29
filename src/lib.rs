@@ -62,7 +62,6 @@ extern crate glium;
 extern crate image as img;
 
 pub mod support;
-mod events;
 mod frame;
 mod window;
 mod image;
@@ -71,7 +70,7 @@ mod shapes;
 pub use window::Window;
 pub use frame::Frame;
 pub use shapes::*;
-pub use events::Event;
+pub use support::events::Event;
 pub use image::Image;
 pub use image::LoadImageError;
 pub use image::ImageParameters;
