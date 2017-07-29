@@ -22,8 +22,11 @@ where
 pub struct Transform<V: glium::Vertex, S: Shape<V>> {
 	phantom: PhantomData<V>,
 	shape: S,
-	translate: [f64; 2],
-	rotate: f64,
+	dx: f64,
+	dy: f64,
+	sx: f64,
+	sy: f64,
+	r: f64,
 }
 
 impl<V, S: Shape<V>> Transform<V, S>
@@ -35,36 +38,53 @@ where
 		Transform {
 			phantom: PhantomData,
 			shape: shape,
-			translate: [0.0; 2],
-			rotate: 0.0,
+			dx: 0.0,
+			dy: 0.0,
+			sx: 1.0,
+			sy: 1.0,
+			r: 0.0,
 		}
 	}
 
 	/// Set the position transform in X and Y
 	pub fn with_position(self, x: f64, y: f64) -> Self {
 		Transform {
-			translate: [x, y],
+			dx: x,
+			dy: y,
 			..self
 		}
 	}
 
 	/// Set the rotation transform in radians
 	pub fn with_rotation(self, angle: f64) -> Self {
+		Transform { r: angle, ..self }
+	}
+
+	/// Set the scale transform. This transformation is relative to the window's
+	/// orientation and not the shape or transforms orientation.
+	pub fn with_scale(self, x: f64, y: f64) -> Self {
 		Transform {
-			rotate: angle,
+			sx: x,
+			sy: y,
 			..self
 		}
 	}
 
 	/// Add x, y to the translation
 	pub fn translate(&mut self, x: f64, y: f64) {
-		self.translate[0] += x;
-		self.translate[1] += y;
+		self.dx += x;
+		self.dy += y;
 	}
 
 	/// Add angle to the rotation
 	pub fn rotate(&mut self, angle: f64) {
-		self.rotate += angle;
+		self.r += angle;
+	}
+
+	/// Add x, y to the scale
+	pub fn scale(&mut self, x: f64, y: f64) {
+		self.sx += x;
+		self.sy += y;
 	}
 }
 
@@ -77,13 +97,14 @@ impl<S: Shape<color::Vertex>> Shape<color::Vertex> for Transform<color::Vertex, 
 			.map(|v| {
 				let x = v.position[0];
 				let y = v.position[1];
-				let dx = self.translate[0];
-				let dy = self.translate[1];
-				let s = self.rotate.sin();
-				let c = self.rotate.cos();
+				let s = self.r.sin();
+				let c = self.r.cos();
 
 				color::Vertex {
-					position: [x * c - y * s + dx, x * s + y * c + dy],
+					position: [
+						self.sx * (x * c - y * s) + self.dx,
+						self.sy * (x * s + y * c) + self.dy,
+					],
 					..v
 				}
 			})
