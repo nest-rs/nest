@@ -1,11 +1,11 @@
 
 use glium;
-use frame::Frame;
-use image::{Image, LoadImageError};
+use super::{Frame, Event, LoadImageError};
+use image::Image;
 use glium::glutin;
 use std::path;
 use support;
-use support::events::{self, Event};
+use events;
 use img;
 
 /**

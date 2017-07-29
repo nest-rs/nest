@@ -3,10 +3,9 @@ use glium;
 use support::shaders::ShaderMode;
 use support::vertex::*;
 use image::Image;
-use std::marker::PhantomData;
 
 /// Trait for structs to be drawn with `draw_shape`
-pub trait Shape<V>: Sized
+pub trait Shape<V>
 where
 	V: glium::Vertex,
 {
@@ -35,83 +34,6 @@ pub enum Transform {
 	Rotate(f64),
 	/// Represents a translation in x, y space
 	Translate(f64, f64),
-}
-
-/// Adds transforms to a Shape
-pub struct Transform<V: glium::Vertex, S: Shape<V>> {
-	phantom: PhantomData<V>,
-	shape: S,
-	translate: [f64; 2],
-	rotate: f64,
-}
-
-impl<V, S: Shape<V>> Transform<V, S>
-where
-	V: glium::Vertex,
-{
-	/// Create a new Transform for a shape
-	pub fn new(shape: S) -> Self {
-		Transform {
-			phantom: PhantomData,
-			shape: shape,
-			translate: [0.0; 2],
-			rotate: 0.0,
-		}
-	}
-
-	/// Set the position transform in X and Y
-	pub fn with_position(self, x: f64, y: f64) -> Self {
-		Transform {
-			translate: [x, y],
-			..self
-		}
-	}
-
-	/// Set the rotation transform in radians
-	pub fn with_rotation(self, angle: f64) -> Self {
-		Transform {
-			rotate: angle,
-			..self
-		}
-	}
-
-	/// Add x, y to the translation
-	pub fn translate(&mut self, x: f64, y: f64) {
-		self.translate[0] += x;
-		self.translate[1] += y;
-	}
-
-	/// Add angle to the rotation
-	pub fn rotate(&mut self, angle: f64) {
-		self.rotate += angle;
-	}
-}
-
-
-impl<S: Shape<color::Vertex>> Shape<color::Vertex> for Transform<color::Vertex, S> {
-	fn points(&self) -> Vec<color::Vertex> {
-		self.shape
-			.points()
-			.into_iter()
-			.map(|v| {
-				let x = v.position[0];
-				let y = v.position[1];
-				let dx = self.translate[0];
-				let dy = self.translate[1];
-				let s = self.rotate.sin();
-				let c = self.rotate.cos();
-
-				color::Vertex {
-					position: [x * c - y * s + dx, x * s + y * c + dy],
-					..v
-				}
-			})
-			.collect()
-	}
-
-	fn shader_mode(&self) -> ShaderMode {
-		self.shape.shader_mode()
-	}
 }
 
 /// A rectangle that does not implement shape.
