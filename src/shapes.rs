@@ -81,10 +81,10 @@ where
 		self.r += angle;
 	}
 
-	/// Add x, y to the scale
+	/// Set the scale
 	pub fn scale(&mut self, x: f64, y: f64) {
-		self.sx += x;
-		self.sy += y;
+		self.sx = x;
+		self.sy = y;
 	}
 }
 

@@ -6,7 +6,7 @@ use std::time::Instant;
 fn main() {
 	let mut app = Window::new("Window Example", 640, 480);
 
-	let factor = 480.0 / 640.0;
+	let mut factor = 480.0 / 640.0;
 
 	let mut shape = Transform::new(ColorRectangle {
 		x: 0.0,
@@ -38,6 +38,10 @@ fn main() {
 		for ev in app.poll_events() {
 			match ev {
 				Event::Closed => break 'main,
+				Event::Resized(w, h) => {
+					factor = (h as f64) / (w as f64);
+					shape.scale(factor, 1.0);
+				}
 				_ => (),
 			}
 		}
