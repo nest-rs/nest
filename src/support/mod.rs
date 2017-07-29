@@ -10,7 +10,7 @@ pub mod shaders;
 #[doc(hidden)]
 pub mod vertex;
 #[doc(hidden)]
-pub mod buffer;
+pub mod events;
 
 use std::time::Duration;
 
