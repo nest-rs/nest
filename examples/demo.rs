@@ -70,7 +70,7 @@ fn main() {
                     w: 0.5,
                     h: 0.5,
                 },
-                Default::default(),
+                None,
             );
 
             frame.draw_rect(0.0, 0.0, 1.0, 1.0, [0.0, 1.0, 1.0, 0.1]);
