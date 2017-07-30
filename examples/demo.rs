@@ -1,10 +1,13 @@
 
 extern crate nest;
-use nest::{Window, Event, ImageParameters};
-use nest::{Rectangle, Circle};
+use nest::{Window, Event};
+use nest::{Rectangle, Circle, ShaderMode};
 use nest::{ElementState, VirtualKeyCode};
+use nest::support::{self, from_html};
+use nest::vertex::color::Vertex;
 
 use std::collections::HashMap;
+use std::time::Instant;
 
 fn main() {
     let mut app = Window::new("Hello World", 640, 480);
@@ -12,34 +15,36 @@ fn main() {
     let pic = app.load_image("examples/city.jpg").unwrap();
 
     let mut time = 0.0;
+    let mut last = Instant::now();
 
     'main: loop {
         {
             let mut frame = app.next_frame();
             frame.clear();
 
-            let delta = frame.delta();
+            let curr = Instant::now();
+            let delta = support::as_sec(curr - last);
+            last = curr;
+
             time += delta;
 
-            frame.set_color_html("312");
-            frame.draw_rect(-0.5, -0.5, 0.5, 0.5);
+            frame.draw_rect(-0.5, -0.5, 0.5, 0.5, from_html("312"));
 
-            frame.set_color_html("#033112");
-            frame.draw_rect(0.0, 0.0, -1.0, -1.0);
+            frame.draw_rect(0.0, 0.0, -1.0, -1.0, from_html("#033112"));
 
-            frame.set_color(0.0, 0.0, 1.0, 0.3);
-            frame.draw(&[(0.0, 0.0), (1.0, 1.0), (1.0, 0.0)]);
+            let color = [0.0, 0.0, 1.0, 0.3];
+            frame.draw(&[Vertex::new(0.0, 0.0, color), Vertex::new(1.0, 1.0, color), Vertex::new(1.0, 0.0, color)], ShaderMode::Color);
 
-            frame.set_color(0.0, 1.0, 0.0, 0.3);
-            frame.draw(&[(0.0, 0.0), (0.0, 1.0), (1.0, 1.0)]);
+            let color = [0.0, 1.0, 0.0, 0.3];
+            frame.draw(&[Vertex::new(0.0, 0.0, color), Vertex::new(0.0, 1.0, color), Vertex::new(1.0, 1.0, color)], ShaderMode::Color);
 
-            frame.set_color(1.0, 0.0, 0.0, 0.3);
-            frame.draw_shape(Circle {
+            frame.draw_shape(&Circle {
                 x: 0.25 * time.sin(),
                 y: -0.25 * time.cos(),
                 rx: 0.75,
                 ry: 0.25,
                 step_size: 10,
+                color: [1.0, 0.0, 0.0, 0.3],
             });
 
             frame.draw_image(
@@ -50,12 +55,12 @@ fn main() {
                     w: 1.0,
                     h: 1.0,
                 },
-                ImageParameters {
-                    dx: 0.3,
-                    dy: 0.0,
-                    dw: 0.3,
-                    dh: 1.0,
-                },
+                Some(Rectangle {
+                    x: 0.3,
+                    y: 0.0,
+                    w: 0.3,
+                    h: 1.0,
+                }),
             );
             frame.draw_image(
                 &pic,
@@ -68,8 +73,7 @@ fn main() {
                 Default::default(),
             );
 
-            frame.set_color(0.0, 1.0, 1.0, 0.1);
-            frame.draw_rect(0.0, 0.0, 1.0, 1.0);
+            frame.draw_rect(0.0, 0.0, 1.0, 1.0, [0.0, 1.0, 1.0, 0.1]);
 
             frame.finish();
         }

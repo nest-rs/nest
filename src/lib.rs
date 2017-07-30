@@ -71,6 +71,8 @@ pub use window::Window;
 pub use frame::Frame;
 pub use shapes::*;
 pub use support::events::Event;
+pub use support::vertex;
+pub use support::shaders::ShaderMode;
 pub use image::Image;
 pub use image::LoadImageError;
 pub use image::ImageParameters;
