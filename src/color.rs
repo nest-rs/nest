@@ -1,3 +1,5 @@
+use glium::uniforms::{AsUniformValue, UniformValue};
+
 #[derive(Copy, Clone, Debug)]
 pub struct Color(f32, f32, f32, f32);
 
@@ -10,6 +12,12 @@ impl Color {
     /// Scale the brightness of the color
     pub fn alpha(self, factor: f32) -> Color {
         Color(self.0, self.1, self.2, self.3 * factor)
+    }
+}
+
+impl AsUniformValue for Color {
+    fn as_uniform_value(&self) -> UniformValue {
+        UniformValue::Vec4([self.0, self.1, self.2, self.3])
     }
 }
 
