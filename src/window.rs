@@ -1,11 +1,22 @@
 use glium;
 use frame::Frame;
-use image::{Image, LoadImageError};
 use glium::glutin;
 use std::path;
 use support;
 use support::events::{self, Event};
 use img;
+use glium::texture::Texture2d;
+use std::io::prelude::*;
+use std::fs::File;
+use std::rc::Rc;
+
+error_chain! {
+    foreign_links {
+        Io(::std::io::Error);
+        Image(img::ImageError);
+        Texture(glium::texture::TextureCreationError);
+    }
+}
 
 /// Represets a window with OpenGL context.
 ///
@@ -99,33 +110,18 @@ impl Window {
     /// let pic = app.load_image("res/city.jpg");
     /// # }
     /// ```
-    pub fn load_image<'a, P: AsRef<path::Path>>(&self, path: P) -> Result<Image, LoadImageError> {
-        use std::io::prelude::*;
-        use std::fs::File;
-
+    pub fn load_image<'a, P: AsRef<path::Path>>(&self, path: P) -> Result<Rc<Texture2d>> {
         let mut buf = Vec::new();
-        match File::open(path) {
-            Ok(mut file) => {
-                match file.read_to_end(&mut buf) {
-                    Ok(_) => (),
-                    Err(err) => return Err(LoadImageError::FileError(err)),
-                }
-            }
-            Err(err) => return Err(LoadImageError::FileError(err)),
-        }
-
-        match img::load_from_memory(&buf[..]) {
-            Ok(image) => {
-                let image = image.to_rgba();
-                let image_dimensions = image.dimensions();
-                let glimage =
-                    glium::texture::RawImage2d::from_raw_rgba(image.into_raw(), image_dimensions);
-                let texture = glium::texture::Texture2d::new(&self.display, glimage).unwrap();
-
-                return Ok(Image::new(image_dimensions, texture));
-            }
-            Err(err) => return Err(LoadImageError::ImageError(err)),
-        }
+        File::open(path)?.read_to_end(&mut buf)?;
+        let image = img::load_from_memory(&buf[..])?.to_rgba();
+        let dims = image.dimensions();
+        Ok(Rc::new(Texture2d::new(
+            &self.display,
+            glium::texture::RawImage2d::from_raw_rgba(
+                image.into_raw(),
+                dims,
+            ),
+        )?))
     }
 
     /// Poll the window for events.

@@ -1,6 +1,5 @@
 #![crate_name = "nest"]
 #![warn(missing_docs)]
-#![deny(warnings)]
 
 //! nest is a glium port of the [nest](https://crates.io/crates/nest)
 //! crate which is a port of the [nest](https://nest.org/) lua graphics
@@ -60,23 +59,20 @@
 extern crate glium;
 extern crate image as img;
 extern crate cgmath as cgm;
+#[macro_use]
+extern crate error_chain;
 
 pub mod support;
 mod frame;
 mod window;
-mod image;
 mod shape;
-mod color;
+pub mod color;
 
 pub use window::Window;
 pub use frame::Frame;
 pub use shape::*;
 pub use support::events::Event;
 pub use support::vertex;
-pub use support::shaders::ShaderMode;
-pub use image::Image;
-pub use image::LoadImageError;
-pub use image::ImageParameters;
 /// Re-export of `glium::glutin::ElementState`
 pub use glium::glutin::ElementState;
 /// Re-export of `glium::glutin::VirtualKeyCode`

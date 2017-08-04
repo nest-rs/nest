@@ -1,5 +1,6 @@
 use glium::uniforms::{AsUniformValue, UniformValue};
 
+/// Color in `(red, green, blue, alpha)` tuple form.
 #[derive(Copy, Clone, Debug)]
 pub struct Color(f32, f32, f32, f32);
 
@@ -55,10 +56,17 @@ impl From<[f32; 4]> for Color {
     }
 }
 
+#[allow(missing_docs)]
 pub const WHITE: Color = Color(0.0, 0.0, 1.0, 1.0);
+#[allow(missing_docs)]
 pub const RED: Color = Color(1.0, 0.0, 0.0, 1.0);
+#[allow(missing_docs)]
 pub const GREEN: Color = Color(0.0, 1.0, 0.0, 1.0);
+#[allow(missing_docs)]
 pub const BLUE: Color = Color(0.0, 0.0, 1.0, 1.0);
+#[allow(missing_docs)]
 pub const YELLOW: Color = Color(1.0, 1.0, 0.0, 1.0);
+#[allow(missing_docs)]
 pub const CYAN: Color = Color(0.0, 1.0, 1.0, 1.0);
+#[allow(missing_docs)]
 pub const MAGENTA: Color = Color(1.0, 0.0, 1.0, 1.0);
