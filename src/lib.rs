@@ -59,12 +59,14 @@
 #[macro_use]
 extern crate glium;
 extern crate image as img;
+extern crate cgmath as cgm;
 
 pub mod support;
 mod frame;
 mod window;
 mod image;
 mod shape;
+mod color;
 
 pub use window::Window;
 pub use frame::Frame;
