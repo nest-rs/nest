@@ -14,6 +14,17 @@ impl Color {
     pub fn alpha(self, factor: f32) -> Color {
         Color(self.0, self.1, self.2, self.3 * factor)
     }
+
+    /// Multiply the colors together (scale every component by each other)
+    pub fn multiply<C: Into<Color>>(self, other: C) -> Color {
+        let other = other.into();
+        Color(
+            self.0 * other.0,
+            self.1 * other.1,
+            self.2 * other.2,
+            self.3 * other.3,
+        )
+    }
 }
 
 impl AsUniformValue for Color {

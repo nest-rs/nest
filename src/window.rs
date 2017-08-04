@@ -2,7 +2,6 @@ use glium;
 use frame::Frame;
 use glium::glutin;
 use std::path;
-use support;
 use support::events::{self, Event};
 use img;
 use glium::texture::Texture2d;
@@ -15,6 +14,7 @@ error_chain! {
         Io(::std::io::Error);
         Image(img::ImageError);
         Texture(glium::texture::TextureCreationError);
+        Program(glium::program::ProgramChooserCreationError);
     }
 }
 
@@ -75,7 +75,7 @@ impl Window {
     /// let mut app = Window::new("Hello World", 640, 480);
     /// # }
     /// ```
-    pub fn new<S: Into<String>>(title: S, width: u32, height: u32) -> Self {
+    pub fn new<S: Into<String>>(title: S, width: u32, height: u32) -> Result<Self> {
         let events_loop = glutin::EventsLoop::new();
         let window = glutin::WindowBuilder::new()
             .with_title(title)
@@ -84,24 +84,28 @@ impl Window {
         let display =
             glium::Display::new(window, context, &events_loop).expect("Could not create Display");
 
-        Window {
+        let texture_program = program!(&display,
+            150 => {
+                vertex: include_str!("shader/texture.vert"),
+                geometry: include_str!("shader/texture.geom"),
+                fragment: include_str!("shader/texture.frag"),
+            },
+        )?;
+
+        let plain_program = program!(&display,
+            150 => {
+                vertex: include_str!("shader/plain.vert"),
+                geometry: include_str!("shader/plain.geom"),
+                fragment: include_str!("shader/plain.frag"),
+            },
+        )?;
+
+        Ok(Window {
             display: display,
             events_loop: events_loop,
-            texture_program: program!(&display,
-                150 => {
-                    vertex: include_str!("shader/texture.vert"),
-                    geometry: include_str!("shader/texture.geom"),
-                    fragment: include_str!("shader/texture.frag"),
-                },
-            ),
-            plain_program: program!(&display,
-                150 => {
-                    vertex: include_str!("shader/plain.vert"),
-                    geometry: include_str!("shader/plain.geom"),
-                    fragment: include_str!("shader/plain.frag"),
-                },
-            ),
-        }
+            texture_program: texture_program,
+            plain_program: plain_program,
+        })
     }
 
     /// Load an image from a file to be drawn by `Frame::draw_image(...)`.
