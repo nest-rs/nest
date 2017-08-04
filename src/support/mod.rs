@@ -5,8 +5,6 @@
 extern crate glium;
 
 #[doc(hidden)]
-pub mod shaders;
-#[doc(hidden)]
 pub mod vertex;
 #[doc(hidden)]
 pub mod events;

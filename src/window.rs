@@ -83,11 +83,6 @@ impl Window {
         let context = glutin::ContextBuilder::new();
         let display =
             glium::Display::new(window, context, &events_loop).expect("Could not create Display");
-        let color_program =
-            support::shaders::color::load_program(&display).expect("Could not create color shader");
-        let texture_program = support::shaders::texture::load_program(&display).expect(
-            "Could not create texture shader",
-        );
 
         Window {
             display: display,
