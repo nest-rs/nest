@@ -15,6 +15,7 @@ error_chain! {
         Image(img::ImageError);
         Texture(glium::texture::TextureCreationError);
         Program(glium::program::ProgramChooserCreationError);
+        DisplayCreation(glium::backend::glutin::DisplayCreationError);
     }
 }
 
@@ -81,8 +82,7 @@ impl Window {
             .with_title(title)
             .with_dimensions(width, height);
         let context = glutin::ContextBuilder::new();
-        let display =
-            glium::Display::new(window, context, &events_loop).expect("Could not create Display");
+        let display = glium::Display::new(window, context, &events_loop)?;
 
         let texture_program = program!(&display,
             150 => {
