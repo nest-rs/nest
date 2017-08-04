@@ -1,7 +1,6 @@
-/*! 
-Method, types, and structs that are not appart of any library component, but
-are useful in tandom with library components.
- */
+//! Method, types, and structs that are not appart of any library component, but
+//! are useful in tandom with library components.
+
 
 extern crate glium;
 
@@ -64,18 +63,18 @@ pub fn from_html(color: &str) -> [f32; 4] {
             (r as f32) / 255.0,
             (g as f32) / 255.0,
             (b as f32) / 255.0,
-            1.0
+            1.0,
         ];
     } else if bytes.len() == 6 {
         let r = u8::from_str_radix(from_utf8(&bytes[0..2]).unwrap(), 16).unwrap();
         let g = u8::from_str_radix(from_utf8(&bytes[2..4]).unwrap(), 16).unwrap();
         let b = u8::from_str_radix(from_utf8(&bytes[4..6]).unwrap(), 16).unwrap();
-       return [
+        return [
             (r as f32) / 255.0,
             (g as f32) / 255.0,
             (b as f32) / 255.0,
             1.0,
-       ];
+        ];
     }
 
     return [0.0, 0.0, 0.0, 0.0];

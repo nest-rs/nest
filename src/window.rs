@@ -1,4 +1,3 @@
-
 use glium;
 use frame::Frame;
 use image::{Image, LoadImageError};
@@ -8,40 +7,38 @@ use support;
 use support::events::{self, Event};
 use img;
 
-/**
-Represets a window with OpenGL context.
-
-This window provides image loading, rendering via `Window::next_frame(...)`,
-and events via `Window::poll_events(...)`.
-
-# Example
-```rust,no_run
-extern crate nest;
-use nest::{Window, Event};
-
-fn main() {
-    let mut app = Window::new("Hello World", 640, 480);
-
-    loop {
-        // Note rust requires this code to be in a closure to please the borrow checker
-        {
-            let mut frame = app.next_frame();
-            
-            // Render Code Goes Here
-
-            frame.finish();
-        }
-
-        for ev in app.poll_events() {
-            match ev {
-                Event::Closed => break,
-                _ => (),
-            }
-        }
-    }
-}
-```
-*/
+/// Represets a window with OpenGL context.
+///
+/// This window provides image loading, rendering via `Window::next_frame(...)`,
+/// and events via `Window::poll_events(...)`.
+///
+/// # Example
+/// ```rust,no_run
+/// extern crate nest;
+/// use nest::{Window, Event};
+///
+/// fn main() {
+///     let mut app = Window::new("Hello World", 640, 480);
+///
+///     loop {
+///         // Note rust requires this code to be in a closure to please the borrow checker
+///         {
+///             let mut frame = app.next_frame();
+///
+///             // Render Code Goes Here
+///
+///             frame.finish();
+///         }
+///
+///         for ev in app.poll_events() {
+///             match ev {
+///                 Event::Closed => break,
+///                 _ => (),
+///             }
+///         }
+///     }
+/// }
+/// ```
 pub struct Window {
     display: glium::Display,
     events_loop: glium::glutin::EventsLoop,
@@ -60,11 +57,11 @@ impl Window {
     /// # Example
     /// ```rust,no_run
     /// extern crate nest;
-	/// # fn main() {
+    /// # fn main() {
     /// use nest::Window;
     ///
     /// let mut app = Window::new("Hello World", 640, 480);
-	/// # }
+    /// # }
     /// ```
     pub fn new<S: Into<String>>(title: S, width: u32, height: u32) -> Self {
         let events_loop = glutin::EventsLoop::new();
@@ -76,8 +73,9 @@ impl Window {
             glium::Display::new(window, context, &events_loop).expect("Could not create Display");
         let color_program =
             support::shaders::color::load_program(&display).expect("Could not create color shader");
-        let texture_program = support::shaders::texture::load_program(&display)
-            .expect("Could not create texture shader");
+        let texture_program = support::shaders::texture::load_program(&display).expect(
+            "Could not create texture shader",
+        );
 
         Window {
             display: display,
@@ -95,11 +93,11 @@ impl Window {
     /// # Example
     /// ```rust,no_run
     /// # extern crate nest;
-	/// # fn main() {
+    /// # fn main() {
     /// # use nest::Window;
     /// let mut app = Window::new("Hello World", 640, 480);
     /// let pic = app.load_image("res/city.jpg");
-	/// # }
+    /// # }
     /// ```
     pub fn load_image<'a, P: AsRef<path::Path>>(&self, path: P) -> Result<Image, LoadImageError> {
         use std::io::prelude::*;
@@ -136,7 +134,7 @@ impl Window {
     /// ```rust,no_run
     /// # extern crate nest;
     /// # use nest::Window;
-	/// # fn main() {
+    /// # fn main() {
     /// use nest::Event;
     ///
     /// let mut app = Window::new("Hello World", 640, 480);
@@ -146,7 +144,7 @@ impl Window {
     ///         _ => ()
     ///     }
     /// }
-	/// # }
+    /// # }
     /// ```
     pub fn poll_events(&mut self) -> Vec<Event> {
         let mut events: Vec<Event> = Vec::new();
@@ -172,17 +170,17 @@ impl Window {
     /// ```rust,no_run
     /// # extern crate nest;
     /// # use nest::Window;
-	/// # fn main() {
+    /// # fn main() {
     /// let mut app = Window::new("Hello World", 640, 480);
     ///
     /// loop {
     ///     let mut frame = app.next_frame();
-    /// 
+    ///
     ///     // Render code goes here
-    /// 
+    ///
     ///     frame.finish();
     /// }
-	/// # }
+    /// # }
     /// ```
     pub fn next_frame(&mut self) -> Frame {
         Frame::new(&self.display, &self.programs)
