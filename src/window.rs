@@ -51,9 +51,10 @@ error_chain! {
 /// }
 /// ```
 pub struct Window {
-    display: glium::Display,
+    pub(crate) display: glium::Display,
     events_loop: glium::glutin::EventsLoop,
-    programs: (glium::Program, glium::Program),
+    pub(crate) texture_program: glium::Program,
+    pub(crate) plain_program: glium::Program,
 }
 
 impl Window {
@@ -91,7 +92,20 @@ impl Window {
         Window {
             display: display,
             events_loop: events_loop,
-            programs: (color_program, texture_program),
+            texture_program: program!(&display,
+                150 => {
+                    vertex: include_str!("shader/texture.vert"),
+                    geometry: include_str!("shader/texture.geom"),
+                    fragment: include_str!("shader/texture.frag"),
+                },
+            ),
+            plain_program: program!(&display,
+                150 => {
+                    vertex: include_str!("shader/plain.vert"),
+                    geometry: include_str!("shader/plain.geom"),
+                    fragment: include_str!("shader/plain.frag"),
+                },
+            ),
         }
     }
 
@@ -178,7 +192,7 @@ impl Window {
     /// }
     /// # }
     /// ```
-    pub fn next_frame(&mut self) -> Frame {
-        Frame::new(&self.display, &self.programs)
+    pub fn next_frame(&self) -> Frame {
+        Frame::new(self)
     }
 }

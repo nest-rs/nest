@@ -1,6 +1,7 @@
 use glium;
 use glium::Surface;
 use shape::Shape;
+use window::Window;
 
 
 /// Represents a single frame in the render loop.
@@ -11,23 +12,18 @@ use shape::Shape;
 ///
 /// # Example
 /// See the example `examples/demo.rs` for a complete example.
-pub struct Frame<'a, 'b> {
-    display: &'a glium::Display,
+pub struct Frame<'a> {
+    window: &'a Window,
     target: Option<glium::Frame>,
-    programs: &'b (glium::Program, glium::Program),
 }
 
-impl<'a, 'b> Frame<'a, 'b> {
+impl<'a> Frame<'a> {
     /// Create a new Frame for a glium `Display` with shader programs for color
     /// and texture.
-    pub fn new(
-        display: &'a glium::Display,
-        programs: &'b (glium::Program, glium::Program),
-    ) -> Self {
+    pub fn new(window: &'a Window) -> Self {
         Frame {
-            display: display,
-            target: Some(display.draw()),
-            programs: programs,
+            window: window,
+            target: Some(window.display.draw()),
         }
     }
 
@@ -70,7 +66,7 @@ impl<'a, 'b> Frame<'a, 'b> {
     /// ```
     pub fn draw<S: Shape>(&mut self, shape: S) {
         let vert_buff =
-            glium::VertexBuffer::new(self.display, &shape.tris().collect::<Vec<_>>()[..])
+            glium::VertexBuffer::new(&self.window.display, &shape.tris().collect::<Vec<_>>()[..])
                 .expect("error: failed to form vertex buffer");
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
         match shape.texture() {
@@ -81,7 +77,7 @@ impl<'a, 'b> Frame<'a, 'b> {
                     .draw(
                         &vert_buff,
                         &indices,
-                        &self.programs.1,
+                        &self.window.texture_program,
                         &uniform! {
                             tex: &*tex,
                             color: shape.color(),
@@ -100,7 +96,7 @@ impl<'a, 'b> Frame<'a, 'b> {
                     .draw(
                         &vert_buff,
                         &indices,
-                        &self.programs.1,
+                        &self.window.plain_program,
                         &uniform! {
                             color: shape.color(),
                         },
@@ -122,7 +118,7 @@ impl<'a, 'b> Frame<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Drop for Frame<'a, 'b> {
+impl<'a> Drop for Frame<'a> {
     fn drop(&mut self) {
         self.target.take().unwrap().finish().expect(
             "error: failed to finish frame render",
