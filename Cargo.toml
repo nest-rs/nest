@@ -1,9 +1,10 @@
 [package]
-authors = ["Thomas Harrison <twh2898@vt.edu>"]
+authors = ["Thomas Harrison <twh2898@vt.edu>", "Geordon Worley <vadixidav@gmail.com>"]
 name = "nest"
 version = "0.1.0"
 
 [dependencies]
-glium = "0.17.0"
-glutin = "0.9.1"
-image = "0.14.0"
+glium = "0.17"
+glutin = "0.9"
+image = "0.14"
+cgmath = "0.15"
