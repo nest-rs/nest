@@ -6,7 +6,7 @@ use std::rc::Rc;
 use glium::texture::Texture2d;
 use std::iter::{Chain, Once, once};
 
-/// Trait for structs to be drawn with `draw_shape`
+/// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape {
     /// The iterator type for the shape which has triangle items
     type Iter: Iterator<Item = Tri>;
@@ -29,7 +29,7 @@ pub trait Shape {
 
 /// Three positions which form a matrix for shader purposes
 #[derive(Copy, Clone, Debug)]
-pub struct Positions(pub [cgm::Point2<f32>; 3]);
+pub struct Positions(pub [[f32; 2]; 3]);
 
 /// A triangle primitive which enters the shader pipeline as a single vertex and is the only primitive in nest
 #[derive(Copy, Clone, Debug)]
@@ -50,16 +50,16 @@ impl Tri {
         Tri {
             positions: Positions(
                 [
-                    positions[0].into(),
-                    positions[1].into(),
-                    positions[2].into(),
+                    positions[0].into().into(),
+                    positions[1].into().into(),
+                    positions[2].into().into(),
                 ],
             ),
             texcoords: Positions(
                 [
-                    texcoords[0].into(),
-                    texcoords[1].into(),
-                    texcoords[2].into(),
+                    texcoords[0].into().into(),
+                    texcoords[1].into().into(),
+                    texcoords[2].into().into(),
                 ],
             ),
         }
@@ -83,11 +83,12 @@ implement_vertex!(Tri, positions, texcoords);
 
 unsafe impl glium::vertex::Attribute for Positions {
     fn get_type() -> glium::vertex::AttributeType {
-        glium::vertex::AttributeType::F32x3x2
+        glium::vertex::AttributeType::F32x2x3
     }
 }
 
 /// Two points make a rectangle.
+#[derive(Copy, Clone, Debug)]
 pub struct Rect(pub [f32; 2], pub [f32; 2]);
 
 impl Shape for Rect {

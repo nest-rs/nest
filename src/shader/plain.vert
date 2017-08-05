@@ -1,12 +1,12 @@
-#version 140
+#version 150
 
-in vec2 positions;
-in vec2 texcoords;
-in vec4 color;
+in mat3x2 positions;
+in mat3x2 texcoords;
 
-out vec4 f_color;
+out mat3x2 v_positions;
+out mat3x2 v_texcoords;
 
 void main() {
-    f_color = color;
-    gl_Position = vec4(positions, 0.0, 1.0);
+    v_positions = positions;
+    v_texcoords = texcoords;
 }

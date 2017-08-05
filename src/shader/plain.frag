@@ -1,8 +1,10 @@
-#version 140
+#version 150
 
-in vec4 o_color;
-out vec4 color;
+in vec2 g_texcoord;
+
+uniform vec4 color;
 
 void main() {
-    color = o_color;
+    float intensity = 1.0 - pow(length(g_texcoord), 2);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

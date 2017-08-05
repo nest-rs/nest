@@ -111,11 +111,7 @@ impl<'a> Frame<'a> {
     }
 
     /// Finish drawing the frame and push it to the screen.
-    pub fn finish(mut self) {
-        self.target.take().unwrap().finish().expect(
-            "error: failed to finish frame render",
-        );
-    }
+    pub fn finish(self) {}
 }
 
 impl<'a> Drop for Frame<'a> {

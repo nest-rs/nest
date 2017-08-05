@@ -1,17 +1,21 @@
-#version 140
+#version 150
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-in vec4 f_color;
+in mat3x2 v_positions[1];
+in mat3x2 v_texcoords[1];
+
+out vec2 g_texcoord;
 
 void main() {
-    gl_Position = projection * (center + vec4(delta, 0, 0));
+    gl_Position = vec4(v_positions[0][0], 0.0, 1.0);
+    g_texcoord = v_texcoords[0][0];
     EmitVertex();
-    delta = full_radius * vec2(-1.7320508075689, -1);
-    gl_Position = projection * (center + vec4(delta, 0, 0));
+    gl_Position = vec4(v_positions[0][1], 0.0, 1.0);
+    g_texcoord = v_texcoords[0][1];
     EmitVertex();
-    delta = full_radius * vec2(1.7320508075689, -1);
-    gl_Position = projection * (center + vec4(delta, 0, 0));
+    gl_Position = vec4(v_positions[0][2], 0.0, 1.0);
+    g_texcoord = v_texcoords[0][2];
     EmitVertex();
 }
