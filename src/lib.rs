@@ -71,6 +71,7 @@ pub mod color;
 pub use window::Window;
 pub use frame::Frame;
 pub use shape::*;
+pub use color::Color;
 pub use support::events::Event;
 pub use support::vertex;
 /// Re-export of `glium::glutin::ElementState`

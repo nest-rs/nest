@@ -85,7 +85,7 @@ impl Window {
         let display = glium::Display::new(window, context, &events_loop)?;
 
         let texture_program = program!(&display,
-            150 => {
+            140 => {
                 vertex: include_str!("shader/texture.vert"),
                 geometry: include_str!("shader/texture.geom"),
                 fragment: include_str!("shader/texture.frag"),
@@ -93,7 +93,7 @@ impl Window {
         )?;
 
         let plain_program = program!(&display,
-            150 => {
+            140 => {
                 vertex: include_str!("shader/plain.vert"),
                 geometry: include_str!("shader/plain.geom"),
                 fragment: include_str!("shader/plain.frag"),

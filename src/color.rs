@@ -2,7 +2,7 @@ use glium::uniforms::{AsUniformValue, UniformValue};
 
 /// Color in `(red, green, blue, alpha)` tuple form.
 #[derive(Copy, Clone, Debug)]
-pub struct Color(f32, f32, f32, f32);
+pub struct Color(pub f32, pub f32, pub f32, pub f32);
 
 impl Color {
     /// Scale the brightness of the color
