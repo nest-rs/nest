@@ -5,6 +5,7 @@ use color::{self, Color};
 use std::rc::Rc;
 use glium::texture::Texture2d;
 use std::iter::{Chain, Once, once};
+use container;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape {
@@ -24,6 +25,17 @@ pub trait Shape {
     #[inline]
     fn texture(&self) -> Option<Rc<Texture2d>> {
         None
+    }
+}
+
+impl<S> container::IntoContainer for S
+where
+    S: Shape + Sized,
+{
+    type IntoCont = Once<Self>;
+
+    fn into_cont(self) -> Once<Self> {
+        once(self)
     }
 }
 

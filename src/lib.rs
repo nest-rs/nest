@@ -67,10 +67,12 @@ mod frame;
 mod window;
 mod shape;
 pub mod color;
+mod container;
 
 pub use window::Window;
 pub use frame::Frame;
 pub use shape::*;
+pub use container::Container;
 pub use color::Color;
 pub use support::events::Event;
 pub use support::vertex;

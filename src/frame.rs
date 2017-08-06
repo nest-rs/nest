@@ -1,8 +1,6 @@
 use glium;
 use glium::Surface;
-use shape::Shape;
-use window::Window;
-
+use {Shape, Tri, Window, container, Container};
 
 /// Represents a single frame in the render loop.
 ///
@@ -64,48 +62,54 @@ impl<'a> Frame<'a> {
     /// # frame.finish();
     /// # }
     /// ```
-    pub fn draw<S: Shape>(&mut self, shape: S) {
-        let vert_buff =
-            glium::VertexBuffer::new(&self.window.display, &shape.tris().collect::<Vec<_>>()[..])
-                .expect("error: failed to form vertex buffer");
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
-        match shape.texture() {
-            Some(tex) => {
-                self.target
-                    .as_mut()
-                    .unwrap()
-                    .draw(
-                        &vert_buff,
-                        &indices,
-                        &self.window.texture_program,
-                        &uniform! {
-                            tex: &*tex,
-                            color: shape.color(),
-                        },
-                        &glium::DrawParameters {
-                            blend: glium::draw_parameters::Blend::alpha_blending(),
-                            ..Default::default()
-                        },
-                    )
-                    .expect("error: failed to draw");
-            }
-            None => {
-                self.target
-                    .as_mut()
-                    .unwrap()
-                    .draw(
-                        &vert_buff,
-                        &indices,
-                        &self.window.plain_program,
-                        &uniform! {
-                            color: shape.color(),
-                        },
-                        &glium::DrawParameters {
-                            blend: glium::draw_parameters::Blend::alpha_blending(),
-                            ..Default::default()
-                        },
-                    )
-                    .expect("error: failed to draw");
+    pub fn draw<C: container::IntoContainer>(&mut self, shapes: C)
+    where
+        <C::IntoCont as Iterator>::Item: Shape,
+    {
+        for shape in shapes.into_cont() {
+            let vert_buff = glium::VertexBuffer::new(
+                &self.window.display,
+                &shape.tris().collect::<Vec<_>>()[..],
+            ).expect("error: failed to form vertex buffer");
+            let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
+            match shape.texture() {
+                Some(tex) => {
+                    self.target
+                        .as_mut()
+                        .unwrap()
+                        .draw(
+                            &vert_buff,
+                            &indices,
+                            &self.window.texture_program,
+                            &uniform! {
+                                    tex: &*tex,
+                                    color: shape.color(),
+                                },
+                            &glium::DrawParameters {
+                                blend: glium::draw_parameters::Blend::alpha_blending(),
+                                ..Default::default()
+                            },
+                        )
+                        .expect("error: failed to draw");
+                }
+                None => {
+                    self.target
+                        .as_mut()
+                        .unwrap()
+                        .draw(
+                            &vert_buff,
+                            &indices,
+                            &self.window.plain_program,
+                            &uniform! {
+                                    color: shape.color(),
+                                },
+                            &glium::DrawParameters {
+                                blend: glium::draw_parameters::Blend::alpha_blending(),
+                                ..Default::default()
+                            },
+                        )
+                        .expect("error: failed to draw");
+                }
             }
         }
     }
