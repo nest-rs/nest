@@ -62,17 +62,19 @@ impl<'a> Frame<'a> {
     /// # frame.finish();
     /// # }
     /// ```
-    pub fn draw<C: container::IntoContainer>(&mut self, shapes: C)
+    pub fn draw<C: Container>(&mut self, shapes: C)
     where
-        <C::IntoCont as Iterator>::Item: Shape,
+        C::Item: Shape,
     {
-        for shape in shapes.into_cont() {
+        for shape in shapes {
+            let color = shape.color();
+            let texture = shape.texture();
             let vert_buff = glium::VertexBuffer::new(
                 &self.window.display,
                 &shape.tris().collect::<Vec<_>>()[..],
             ).expect("error: failed to form vertex buffer");
             let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
-            match shape.texture() {
+            match texture {
                 Some(tex) => {
                     self.target
                         .as_mut()
@@ -83,7 +85,7 @@ impl<'a> Frame<'a> {
                             &self.window.texture_program,
                             &uniform! {
                                     tex: &*tex,
-                                    color: shape.color(),
+                                    color: color,
                                 },
                             &glium::DrawParameters {
                                 blend: glium::draw_parameters::Blend::alpha_blending(),
@@ -101,7 +103,7 @@ impl<'a> Frame<'a> {
                             &indices,
                             &self.window.plain_program,
                             &uniform! {
-                                    color: shape.color(),
+                                    color: color,
                                 },
                             &glium::DrawParameters {
                                 blend: glium::draw_parameters::Blend::alpha_blending(),

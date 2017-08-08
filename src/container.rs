@@ -1,16 +1,9 @@
-use {Shape, Tri};
+use {BaseShape, Tri};
 
 pub trait Container: Iterator {}
 
-impl<SI, S> Container for SI
+impl<SI> Container for SI
 where
-    SI: Iterator<Item = S>,
-    S: Shape,
+    SI: Iterator<Item = BaseShape>,
 {
-}
-
-pub trait IntoContainer {
-    type IntoCont: Container;
-
-    fn into_cont(self) -> Self::IntoCont;
 }

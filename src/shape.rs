@@ -6,6 +6,8 @@ use std::rc::Rc;
 use glium::texture::Texture2d;
 use std::iter::{Chain, Once, once};
 use container;
+use std::vec;
+use std::borrow::Borrow;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape {
@@ -13,7 +15,7 @@ pub trait Shape {
     type Iter: Iterator<Item = Tri>;
 
     /// The triangles of the shape
-    fn tris(&self) -> Self::Iter;
+    fn tris(self) -> Self::Iter;
 
     /// The color of the shape
     #[inline]
@@ -28,14 +30,25 @@ pub trait Shape {
     }
 }
 
-impl<S> container::IntoContainer for S
-where
-    S: Shape + Sized,
-{
-    type IntoCont = Once<Self>;
+pub struct BaseShape {
+    pub(crate) tris: Rc<Iterator<Item = Tri>>,
+    pub(crate) color: Color,
+    pub(crate) texture: Option<Rc<Texture2d>>,
+}
 
-    fn into_cont(self) -> Once<Self> {
-        once(self)
+impl<T> From<T> for BaseShape
+where
+    T: Shape,
+    T::Iter: 'static,
+{
+    fn from(shape: T) -> BaseShape {
+        let color = shape.color();
+        let texture = shape.texture();
+        BaseShape {
+            tris: Rc::new(shape.tris()) as Rc<Iterator<Item = Tri>>,
+            color: color,
+            texture: texture,
+        }
     }
 }
 
@@ -105,7 +118,7 @@ pub struct Rect(pub [f32; 2], pub [f32; 2]);
 
 impl Shape for Rect {
     type Iter = Chain<Once<Tri>, Once<Tri>>;
-    fn tris(&self) -> Self::Iter {
+    fn tris(self) -> Self::Iter {
         once(Tri::new_pos(
             [
                 [self.0[0], self.0[1]],
