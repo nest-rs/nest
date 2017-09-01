@@ -63,13 +63,11 @@ extern crate cgmath as cgm;
 extern crate error_chain;
 
 pub mod support;
-mod frame;
 mod window;
 mod shape;
 pub mod color;
 
 pub use window::Window;
-pub use frame::Frame;
 pub use shape::*;
 pub use color::Color;
 pub use support::events::Event;

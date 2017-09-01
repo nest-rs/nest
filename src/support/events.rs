@@ -1,6 +1,7 @@
 use glium::glutin::{self, ElementState, MouseButton, VirtualKeyCode, WindowEvent};
 
 /// Represents events passed form `Window`.
+#[derive(Clone, Debug, PartialEq)]
 pub enum Event {
     /// Window resize event `(x, y)`
     Resized(u32, u32),

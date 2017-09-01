@@ -1,5 +1,5 @@
 use glium;
-use frame::Frame;
+use glium::Surface;
 use glium::glutin;
 use std::path;
 use support::events::{self, Event};
@@ -8,6 +8,9 @@ use glium::texture::Texture2d;
 use std::io::prelude::*;
 use std::fs::File;
 use std::rc::Rc;
+use Color;
+use Shape;
+use std::vec;
 
 error_chain! {
     foreign_links {
@@ -56,6 +59,7 @@ pub struct Window {
     events_loop: glium::glutin::EventsLoop,
     pub(crate) texture_program: glium::Program,
     pub(crate) plain_program: glium::Program,
+    pub clear_color: Color,
 }
 
 impl Window {
@@ -105,6 +109,7 @@ impl Window {
             events_loop: events_loop,
             texture_program: texture_program,
             plain_program: plain_program,
+            clear_color: Color::BLACK,
         })
     }
 
@@ -155,7 +160,7 @@ impl Window {
     /// }
     /// # }
     /// ```
-    pub fn poll_events(&mut self) -> Vec<Event> {
+    pub fn poll_events(&mut self) -> vec::IntoIter<Event> {
         let mut events: Vec<Event> = Vec::new();
 
         self.events_loop.poll_events(|ev| {
@@ -166,32 +171,63 @@ impl Window {
             }
         });
 
-        events
+        events.into_iter()
     }
 
-    /// Get the next frame for rendering.
-    ///
-    /// This method sets up the window and renderer for the next frame. The
-    /// `Frame` object returned includes the methods for rendering to the frame
-    /// along with delta time and window size.
-    ///
-    /// # Example
-    /// ```rust,no_run
-    /// # extern crate nest;
-    /// # use nest::Window;
-    /// # fn main() {
-    /// let mut app = Window::new("Hello World", 640, 480);
-    ///
-    /// loop {
-    ///     let mut frame = app.next_frame();
-    ///
-    ///     // Render code goes here
-    ///
-    ///     frame.finish();
-    /// }
-    /// # }
-    /// ```
-    pub fn next_frame(&self) -> Frame {
-        Frame::new(self)
+    pub fn draw<S: Shape>(&mut self, shape: S) {
+        let mut target = self.display.draw();
+        target.clear_color(
+            self.clear_color.0[0],
+            self.clear_color.0[1],
+            self.clear_color.0[2],
+            self.clear_color.0[3],
+        );
+        for rtri in shape {
+            let texture = rtri.texture;
+            let vert_buff = glium::VertexBuffer::new(
+                &self.display,
+                &[rtri.tri],
+            ).expect("error: failed to form vertex buffer");
+            let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
+            match texture {
+                Some(tex) => {
+                    target
+                        .draw(
+                            &vert_buff,
+                            &indices,
+                            &self.texture_program,
+                            &uniform! {
+                                tex: &*tex,
+                            },
+                            &glium::DrawParameters {
+                                blend: glium::draw_parameters::Blend::alpha_blending(),
+                                ..Default::default()
+                            },
+                        )
+                        .expect("error: failed to draw");
+                }
+                None => {
+                    target
+                        .draw(
+                            &vert_buff,
+                            &indices,
+                            &self.plain_program,
+                            &glium::uniforms::EmptyUniforms,
+                            &glium::DrawParameters {
+                                blend: glium::draw_parameters::Blend::alpha_blending(),
+                                ..Default::default()
+                            },
+                        )
+                        .expect("error: failed to draw");
+                }
+            }
+        }
+        target.finish().expect("error: failed to finish rendering");
+    }
+
+    pub fn draw_all<I, S>(&mut self, it: I) where I: IntoIterator<Item=S>, S: Shape {
+        for shape in it {
+            self.draw(shape);
+        }
     }
 }
