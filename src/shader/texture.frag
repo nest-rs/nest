@@ -1,10 +1,10 @@
 #version 150
 
 in vec2 g_texcoord;
+in vec4 g_color;
 
-uniform vec4 color;
+uniform sampler2D tex;
 
 void main() {
-    float intensity = 1.0 - pow(length(g_texcoord), 2);
-    gl_FragColor = intensity * color;
+    gl_FragColor = g_color * texture(tex, g_texcoord);
 }

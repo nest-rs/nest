@@ -1,53 +1,27 @@
 use glium;
 use cgm;
 
-use color::{self, Color};
+use color::Color;
 use std::rc::Rc;
 use glium::texture::Texture2d;
 use std::iter::{Chain, Once, once};
-use container;
-use std::vec;
-use std::borrow::Borrow;
 
 /// Trait for structs to be drawn with `Frame::draw`
-pub trait Shape {
-    /// The iterator type for the shape which has triangle items
-    type Iter: Iterator<Item = Tri>;
+pub trait Shape: IntoIterator<Item = RendTri> {}
 
-    /// The triangles of the shape
-    fn tris(self) -> Self::Iter;
+impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
 
-    /// The color of the shape
-    #[inline]
-    fn color(&self) -> Color {
-        color::WHITE
-    }
-
-    /// The texture of the shader
-    #[inline]
-    fn texture(&self) -> Option<Rc<Texture2d>> {
-        None
-    }
-}
-
-pub struct BaseShape {
-    pub(crate) tris: Rc<Iterator<Item = Tri>>,
-    pub(crate) color: Color,
+/// Renderable triangle which includes color and texture information.
+pub struct RendTri {
+    pub(crate) tri: Tri,
     pub(crate) texture: Option<Rc<Texture2d>>,
 }
 
-impl<T> From<T> for BaseShape
-where
-    T: Shape,
-    T::Iter: 'static,
-{
-    fn from(shape: T) -> BaseShape {
-        let color = shape.color();
-        let texture = shape.texture();
-        BaseShape {
-            tris: Rc::new(shape.tris()) as Rc<Iterator<Item = Tri>>,
-            color: color,
-            texture: texture,
+impl From<Tri> for RendTri {
+    fn from(tri: Tri) -> Self {
+        RendTri {
+            tri: tri,
+            texture: None,
         }
     }
 }
@@ -63,14 +37,17 @@ pub struct Tri {
     pub positions: Positions,
     /// The three texture coordinates of the above vertices
     pub texcoords: Positions,
+    /// The color of this triangle.
+    pub color: [f32; 4],
 }
 
 impl Tri {
     /// Create a new triangle with points and tex coordinates specified
     #[inline]
-    pub fn new<P: Into<cgm::Point2<f32>> + Copy, T: Into<cgm::Point2<f32>> + Copy>(
+    pub fn new<P: Into<cgm::Point2<f32>> + Copy, T: Into<cgm::Point2<f32>> + Copy, C: Into<Color>>(
         positions: [P; 3],
         texcoords: [T; 3],
+        color: C,
     ) -> Tri {
         Tri {
             positions: Positions(
@@ -87,6 +64,7 @@ impl Tri {
                     texcoords[2].into().into(),
                 ],
             ),
+            color: color.into().0,
         }
     }
 
@@ -100,11 +78,12 @@ impl Tri {
                 positions[2].into(),
             ],
             [cgm::Point2::new(0.0, 0.0); 3],
+            Color::WHITE,
         )
     }
 }
 
-implement_vertex!(Tri, positions, texcoords);
+implement_vertex!(Tri, positions, texcoords, color);
 
 unsafe impl glium::vertex::Attribute for Positions {
     fn get_type() -> glium::vertex::AttributeType {
@@ -116,21 +95,22 @@ unsafe impl glium::vertex::Attribute for Positions {
 #[derive(Copy, Clone, Debug)]
 pub struct Rect(pub [f32; 2], pub [f32; 2]);
 
-impl Shape for Rect {
-    type Iter = Chain<Once<Tri>, Once<Tri>>;
-    fn tris(self) -> Self::Iter {
+impl IntoIterator for Rect {
+    type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
+    type Item = RendTri;
+    fn into_iter(self) -> Self::IntoIter {
         once(Tri::new_pos(
             [
                 [self.0[0], self.0[1]],
                 [self.1[0], self.0[1]],
                 [self.0[0], self.1[1]],
             ],
-        )).chain(once(Tri::new_pos(
+        ).into()).chain(once(Tri::new_pos(
             [
                 [self.1[0], self.1[1]],
                 [self.0[0], self.1[1]],
                 [self.1[0], self.0[1]],
             ],
-        )))
+        ).into()))
     }
 }

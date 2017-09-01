@@ -1,9 +1,6 @@
 //! Method, types, and structs that are not appart of any library component, but
 //! are useful in tandom with library components.
 
-
-extern crate glium;
-
 #[doc(hidden)]
 pub mod vertex;
 #[doc(hidden)]

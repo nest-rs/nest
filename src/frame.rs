@@ -1,6 +1,6 @@
 use glium;
 use glium::Surface;
-use {Shape, Tri, Window, container, Container};
+use {Shape, Window};
 
 /// Represents a single frame in the render loop.
 ///
@@ -62,16 +62,12 @@ impl<'a> Frame<'a> {
     /// # frame.finish();
     /// # }
     /// ```
-    pub fn draw<C: Container>(&mut self, shapes: C)
-    where
-        C::Item: Shape,
-    {
-        for shape in shapes {
-            let color = shape.color();
-            let texture = shape.texture();
+    pub fn draw<S: Shape>(&mut self, shape: S) {
+        for rtri in shape {
+            let texture = rtri.texture;
             let vert_buff = glium::VertexBuffer::new(
                 &self.window.display,
-                &shape.tris().collect::<Vec<_>>()[..],
+                &[rtri.tri],
             ).expect("error: failed to form vertex buffer");
             let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
             match texture {
@@ -84,9 +80,8 @@ impl<'a> Frame<'a> {
                             &indices,
                             &self.window.texture_program,
                             &uniform! {
-                                    tex: &*tex,
-                                    color: color,
-                                },
+                                tex: &*tex,
+                            },
                             &glium::DrawParameters {
                                 blend: glium::draw_parameters::Blend::alpha_blending(),
                                 ..Default::default()
@@ -102,9 +97,7 @@ impl<'a> Frame<'a> {
                             &vert_buff,
                             &indices,
                             &self.window.plain_program,
-                            &uniform! {
-                                    color: color,
-                                },
+                            &glium::uniforms::EmptyUniforms,
                             &glium::DrawParameters {
                                 blend: glium::draw_parameters::Blend::alpha_blending(),
                                 ..Default::default()
