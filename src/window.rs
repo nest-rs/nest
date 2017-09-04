@@ -174,28 +174,51 @@ impl Window {
         events.into_iter()
     }
 
-    pub fn draw<S: Shape>(&mut self, shape: S) {
-        let mut target = self.display.draw();
-        target.clear_color(
+    pub fn frame<'a>(&'a self) -> Frame<'a> {
+        let mut f = self.display.draw();
+        f.clear_color(
             self.clear_color.0[0],
             self.clear_color.0[1],
             self.clear_color.0[2],
             self.clear_color.0[3],
         );
+        Frame{
+            target: Some(f),
+            window: self,
+        }
+    }
+
+    pub fn draw<S>(&mut self, shape: S) where S: Shape {
+        let mut frame = self.frame();
+        frame.draw(shape);
+    }
+}
+
+pub struct Frame<'a> {
+    target: Option<glium::Frame>,
+    window: &'a Window,
+}
+
+impl<'a> Frame<'a> {
+    pub fn finish(mut self) {
+        self.target.take().unwrap().finish().expect("error: failed to finish drawing");
+    }
+
+    pub fn draw<S>(&mut self, shape: S) where S: Shape {
         for rtri in shape {
             let texture = rtri.texture;
             let vert_buff = glium::VertexBuffer::new(
-                &self.display,
+                &self.window.display,
                 &[rtri.tri],
             ).expect("error: failed to form vertex buffer");
             let indices = glium::index::NoIndices(glium::index::PrimitiveType::Points);
             match texture {
                 Some(tex) => {
-                    target
+                    self.target.as_mut().unwrap()
                         .draw(
                             &vert_buff,
                             &indices,
-                            &self.texture_program,
+                            &self.window.texture_program,
                             &uniform! {
                                 tex: &*tex,
                             },
@@ -207,11 +230,11 @@ impl Window {
                         .expect("error: failed to draw");
                 }
                 None => {
-                    target
+                    self.target.as_mut().unwrap()
                         .draw(
                             &vert_buff,
                             &indices,
-                            &self.plain_program,
+                            &self.window.plain_program,
                             &glium::uniforms::EmptyUniforms,
                             &glium::DrawParameters {
                                 blend: glium::draw_parameters::Blend::alpha_blending(),
@@ -222,12 +245,13 @@ impl Window {
                 }
             }
         }
-        target.finish().expect("error: failed to finish rendering");
     }
+}
 
-    pub fn draw_all<I, S>(&mut self, it: I) where I: IntoIterator<Item=S>, S: Shape {
-        for shape in it {
-            self.draw(shape);
+impl<'a> Drop for Frame<'a> {
+    fn drop(&mut self) {
+        if let Some(t) = self.target.take() {
+            t.finish().expect("error: failed to finish drawing");
         }
     }
 }
