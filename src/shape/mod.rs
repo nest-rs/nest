@@ -6,8 +6,14 @@ use std::rc::Rc;
 use glium::texture::Texture2d;
 use std::iter::{Chain, Once, once};
 
+mod translate;
+
+pub use self::translate::*;
+
 /// Trait for structs to be drawn with `Frame::draw`
-pub trait Shape: IntoIterator<Item = RendTri> {}
+pub trait Shape: IntoIterator<Item = RendTri> {
+    
+}
 
 impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
 
@@ -15,6 +21,32 @@ impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
 pub struct RendTri {
     pub(crate) tri: Tri,
     pub(crate) texture: Option<Rc<Texture2d>>,
+}
+
+impl RendTri {
+    #[inline]
+    fn map_pos<F: FnMut(cgm::Point2<f32>) -> cgm::Point2<f32>>(mut self, f: F) -> RendTri {
+        self.tri.positions = self.tri.positions.map(f);
+        self
+    }
+
+    #[inline]
+    fn map_tex<F: FnMut(cgm::Point2<f32>) -> cgm::Point2<f32>>(mut self, f: F) -> RendTri {
+        self.tri.texcoords = self.tri.texcoords.map(f);
+        self
+    }
+
+    #[inline]
+    fn map_color<F: FnMut([f32; 4]) -> [f32; 4]>(mut self, mut f: F) -> RendTri {
+        self.tri.color = f(self.tri.color);
+        self
+    }
+
+    #[inline]
+    fn map_texture<T: Into<Option<Rc<Texture2d>>>>(mut self, t: T) -> RendTri {
+        self.texture = t.into();
+        self
+    }
 }
 
 impl From<Tri> for RendTri {
@@ -29,6 +61,12 @@ impl From<Tri> for RendTri {
 /// Three positions which form a matrix for shader purposes
 #[derive(Copy, Clone, Debug)]
 pub struct Positions(pub [[f32; 2]; 3]);
+
+impl Positions {
+    fn map<F: FnMut(cgm::Point2<f32>) -> cgm::Point2<f32>>(self, mut f: F) -> Positions {
+        Positions([f(self.0[0].into()).into(), f(self.0[1].into()).into(), f(self.0[2].into()).into()])
+    }
+}
 
 /// A triangle primitive which enters the shader pipeline as a single vertex and is the only primitive in nest
 #[derive(Copy, Clone, Debug)]
