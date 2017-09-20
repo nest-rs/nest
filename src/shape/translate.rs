@@ -5,6 +5,15 @@ pub struct Translate<S> {
     v: cgm::Vector2<f32>,
 }
 
+impl<S> Translate<S> {
+    pub fn new(shape: S, v: cgm::Vector2<f32>) -> Self {
+        Translate {
+            shape: shape,
+            v: v,
+        }
+    }
+}
+
 impl<S> IntoIterator for Translate<S> where S: Shape {
     type Item = RendTri;
     type IntoIter = TranslateIter<S::IntoIter>;

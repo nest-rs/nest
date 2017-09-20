@@ -12,7 +12,17 @@ pub use self::translate::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
-    
+    /// Translate a shape using a `vector` which represents the direction and magnitude to translate it by.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).translate([0.1, 0.1]));
+    /// ```
+    fn translate<V: Into<cgm::Vector2<f32>>>(&self, vector: V) -> Translate<Self> where Self: Clone {
+        Translate::new(self.clone(), vector.into())
+    }
 }
 
 impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
