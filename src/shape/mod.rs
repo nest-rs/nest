@@ -7,8 +7,10 @@ use glium::texture::Texture2d;
 use std::iter::{Chain, Once, once};
 
 mod translate;
+mod rotate;
 
 pub use self::translate::*;
+pub use self::rotate::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
@@ -22,6 +24,19 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// ```
     fn translate<V: Into<cgm::Vector2<f32>>>(&self, vector: V) -> Translate<Self> where Self: Clone {
         Translate::new(self.clone(), vector.into())
+    }
+
+    /// Rotate a shape using an angle in radians.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// use std::f32::consts::PI;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).rotate(PI));
+    /// ```
+    fn rotate(&self, angle: f32) -> Rotate<Self> where Self: Clone {
+        Rotate::new(self.clone(), angle)
     }
 }
 
