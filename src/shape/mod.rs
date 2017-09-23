@@ -8,12 +8,19 @@ use std::iter::{Chain, Once, once};
 
 mod translate;
 mod rotate;
+mod combine;
 
 pub use self::translate::*;
 pub use self::rotate::*;
+pub use self::combine::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
+    /// Combine shapes together so they become one shape.
+    fn combine<S: Shape>(self, rhs: S) -> Combine<Self, S> where Self: Sized {
+        Combine(self, rhs)
+    }
+
     /// Translate a shape using a `vector` which represents the direction and magnitude to translate it by.
     ///
     /// ## Example
@@ -162,13 +169,13 @@ impl IntoIterator for Rect {
     type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
     type Item = RendTri;
     fn into_iter(self) -> Self::IntoIter {
-        once(Tri::new_pos(
+        Iterator::chain(once(Tri::new_pos(
             [
                 [self.0[0], self.0[1]],
                 [self.1[0], self.0[1]],
                 [self.0[0], self.1[1]],
             ],
-        ).into()).chain(once(Tri::new_pos(
+        ).into()), once(Tri::new_pos(
             [
                 [self.1[0], self.1[1]],
                 [self.0[0], self.1[1]],
@@ -176,4 +183,9 @@ impl IntoIterator for Rect {
             ],
         ).into()))
     }
+}
+
+/// Takes two points and creates a rectangle from those two points.
+pub fn rect<A: Into<cgm::Point2<f32>>, B: Into<cgm::Point2<f32>>>(first: A, second: B) -> Rect {
+    Rect(first.into().into(), second.into().into())
 }

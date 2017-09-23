@@ -1,5 +1,5 @@
 extern crate nest;
-use nest::{Window, Event, Rect};
+use nest::*;
 use std::iter::empty;
 
 fn main() {

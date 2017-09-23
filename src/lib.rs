@@ -1,59 +1,30 @@
-#![crate_name = "nest"]
 #![warn(missing_docs)]
 
-//! nest is a glium port of the [nest](https://crates.io/crates/nest)
-//! crate which is a port of the [nest](https://nest.org/) lua graphics
-//! library. This library was developed as a 2D graphics prototyping library and
-//! is not ment for high-performance.
+//! Nest is a crate to start protyping and making 2d graphics with as little effort as possible.
+//! It's powerful combinators assist in making ordered transformations on different levels to
+//! build larger and larger shapes.
+//! 
+//! This library does perform well, but not as well as rendering manually with custom shaders.
+//! For almost any 2d application this performance will be sufficient, but this library is not designed
+//! for high-performance drawing. If you are drawing more than a million polygons per frame, you may not
+//! want to use this library, but profile as desired. We are still committed to improving the performance given our
+//! API as much as possible.
 //!
 //! # Example
 //!
 //! ```rust,no_run
 //! extern crate nest;
-//! use nest::{Window, Event};
-//!
+//! use nest::*;
+//! 
 //! fn main() {
-//! let mut app = Window::new("Window Example", 640, 480);
-//!
-//! 'main: loop {
-//! Note rust requires this code to be in a closure to please the borrow checker
-//! {
-//! let mut frame = app.next_frame();
-//! frame.clear();
-//!
-//! frame.set_color(1.0, 1.0, 1.0, 1.0);
-//! frame.draw_rect(0.0, 0.0, 1.0, 1.0);
-//!
-//! frame.finish();
-//! }
-//!
-//! for ev in app.poll_events() {
-//! match ev {
-//! Event::Closed => break 'main,
-//! _ => (),
-//! }
-//! }
-//! }
+//!     let mut app = Window::new("Example", 640, 480).expect("error: failed to open window");
+//! 
+//!     while !app.poll_events().any(|e| e == Event::Closed) {
+//!         app.draw(rect([-0.5, -0.5], [0.5, 0.5]).translate((-0.1, -0.1)).combine(
+//!             rect([-0.8, -0.8], [0.3, 0.3])).translate([0.1, 0.1]).rotate(0.5));
+//!     }
 //! }
 //! ```
-//!
-//! Current renderable objects are:
-//!
-//! Line (soon to be depricated)
-//! Polygon (TrianglFan)
-//! Rectangle
-//! Circle (really an oval)
-//! Image (with cropping)
-//! Color (HTML / RGBA)
-//! Alpha Blend Transparency
-//!
-//! Planned features include:
-//!
-//! - Rotation
-//! - Text (ttf fonts)
-//! - Text (char-map)
-//! - Audio
-//!
 
 #[macro_use]
 extern crate glium;
@@ -66,12 +37,14 @@ mod window;
 mod shape;
 mod color;
 mod event;
+mod time;
 
 pub use window::*;
 pub use shape::*;
 pub use color::*;
 pub use event::*;
+pub use time::*;
 /// Re-export of `glium::glutin::ElementState`
-pub use glium::glutin::ElementState;
+pub use glium::glutin::ElementState as KeyState;
 /// Re-export of `glium::glutin::VirtualKeyCode`
-pub use glium::glutin::VirtualKeyCode;
+pub use glium::glutin::VirtualKeyCode as Key;

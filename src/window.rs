@@ -1,57 +1,41 @@
 use glium;
 use glium::Surface;
 use glium::glutin;
-use std::path;
-use Event;
-use event;
-use img;
 use glium::texture::Texture2d;
 use std::io::prelude::*;
 use std::fs::File;
 use std::rc::Rc;
-use Color;
-use Shape;
 use std::vec;
+use std::path;
+use *;
 
-error_chain! {
-    foreign_links {
-        Io(::std::io::Error);
-        Image(img::ImageError);
-        Texture(glium::texture::TextureCreationError);
-        Program(glium::program::ProgramChooserCreationError);
-        DisplayCreation(glium::backend::glutin::DisplayCreationError);
+#[allow(missing_docs, unused_doc_comment)]
+pub mod error {
+    error_chain! {
+        foreign_links {
+            Io(::std::io::Error);
+            Image(super::img::ImageError);
+            Texture(super::glium::texture::TextureCreationError);
+            Program(super::glium::program::ProgramChooserCreationError);
+            DisplayCreation(super::glium::backend::glutin::DisplayCreationError);
+        }
     }
 }
 
+pub use error::*;
+
 /// Represets a window with OpenGL context.
-///
-/// This window provides image loading, rendering via `Window::next_frame(...)`,
-/// and events via `Window::poll_events(...)`.
 ///
 /// # Example
 /// ```rust,no_run
-/// extern crate nest;
-/// use nest::{Window, Event};
-///
+/// use nest::*;
+/// use std::iter::empty;
+/// 
 /// fn main() {
-///     let mut app = Window::new("Hello World", 640, 480);
-///
-///     loop {
-///         // Note rust requires this code to be in a closure to please the borrow checker
-///         {
-///             let mut frame = app.next_frame();
-///
-///             // Render Code Goes Here
-///
-///             frame.finish();
-///         }
-///
-///         for ev in app.poll_events() {
-///             match ev {
-///                 Event::Closed => break,
-///                 _ => (),
-///             }
-///         }
+///     let mut app = Window::new("Window Example", 640, 480).unwrap();
+/// 
+///     while !app.poll_events().any(|e| e == Event::Closed) {
+///         app.draw(empty());
 ///     }
 /// }
 /// ```
@@ -60,7 +44,7 @@ pub struct Window {
     events_loop: glium::glutin::EventsLoop,
     pub(crate) texture_program: glium::Program,
     pub(crate) plain_program: glium::Program,
-    pub clear_color: Color,
+    pub(crate) clear_color: Color,
 }
 
 impl Window {
@@ -122,14 +106,11 @@ impl Window {
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate nest;
-    /// # fn main() {
     /// # use nest::Window;
-    /// let mut app = Window::new("Hello World", 640, 480);
-    /// let pic = app.load_image("res/city.jpg");
-    /// # }
+    /// let mut app = Window::new("Window Example", 640, 480).unwrap();
+    /// let pic = app.load_image("res/city.jpg").unwrap();
     /// ```
-    pub fn load_image<'a, P: AsRef<path::Path>>(&self, path: P) -> Result<Rc<Texture2d>> {
+    pub fn load_image<P: AsRef<path::Path>>(&self, path: P) -> Result<Rc<Texture2d>> {
         let mut buf = Vec::new();
         File::open(path)?.read_to_end(&mut buf)?;
         let image = img::load_from_memory(&buf[..])?.to_rgba();
@@ -143,23 +124,34 @@ impl Window {
         )?))
     }
 
+    /// Change the color which the screen is cleared with between frames.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// # use nest::*;
+    /// let mut app = Window::new("Window Example", 640, 480).unwrap();
+    /// app.clear_color(Color::RED);
+    /// ```
+    pub fn clear_color<C: Into<Color>>(&mut self, color: C) {
+        self.clear_color = color.into();
+    }
+
     /// Poll the window for events.
     ///
     /// # Example
     /// ```rust,no_run
-    /// # extern crate nest;
-    /// # use nest::Window;
-    /// # fn main() {
-    /// use nest::Event;
+    /// # use nest::*;
+    /// let mut app = Window::new("Window Example", 640, 480).unwrap();
     ///
-    /// let mut app = Window::new("Hello World", 640, 480);
-    ///
-    /// for ev in app.poll_events() {
-    ///     match ev {
-    ///         _ => ()
+    /// for event in app.poll_events() {
+    ///     match event {
+    ///         // Close if they close the window or hit escape.
+    ///         Event::Closed | Event::KeyboardInput(KeyState::Pressed, Some(Key::Escape)) => return,
+    ///         // Print "Space!" if they hit space.
+    ///         Event::KeyboardInput(KeyState::Pressed, Some(Key::Space)) => println!("Space!"),
+    ///         _ => {}
     ///     }
     /// }
-    /// # }
     /// ```
     pub fn poll_events(&mut self) -> vec::IntoIter<Event> {
         let mut events: Vec<Event> = Vec::new();
@@ -175,6 +167,20 @@ impl Window {
         events.into_iter()
     }
 
+    /// Clears the screen and gets a `Frame` which can be used to make multiple draw calls to in one frame.
+    /// When dropped, `Frame` automatically draws the frame.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// # use nest::*;
+    /// let mut app = Window::new("Window Example", 640, 480).unwrap();
+    ///
+    /// while !app.poll_events().any(|e| e == Event::Closed) {
+    ///     let mut frame = app.frame();
+    ///     frame.draw(rect([0.0, 0.0], [1.0, 1.0]));
+    ///     frame.finish();
+    /// }
+    /// ```
     pub fn frame<'a>(&'a self) -> Frame<'a> {
         let mut f = self.display.draw();
         f.clear_color(
@@ -189,22 +195,25 @@ impl Window {
         }
     }
 
+    /// Clears the frame, draws the `shape`, and updates the window.
     pub fn draw<S>(&mut self, shape: S) where S: Shape {
         let mut frame = self.frame();
         frame.draw(shape);
     }
 }
 
+/// `Frame` can be used to make multiple separate draw calls in one frame. When it drops/exits scope,
+/// it automatically updates the window with the frame, but it can also be finished by calling the method `finish()`.
 pub struct Frame<'a> {
     target: Option<glium::Frame>,
     window: &'a Window,
 }
 
 impl<'a> Frame<'a> {
-    pub fn finish(mut self) {
-        self.target.take().unwrap().finish().expect("error: failed to finish drawing");
-    }
+    /// Forces the frame to be consumed and update the window immediately.
+    pub fn finish(self) {}
 
+    /// Draws the `shape`.
     pub fn draw<S>(&mut self, shape: S) where S: Shape {
         for rtri in shape {
             let texture = rtri.texture;

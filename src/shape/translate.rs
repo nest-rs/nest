@@ -1,12 +1,14 @@
 use {cgm, Shape, RendTri};
 
+/// `Translate` represents a shape which has been translated.
+#[derive(Copy, Clone, Debug)]
 pub struct Translate<S> {
     shape: S,
     v: cgm::Vector2<f32>,
 }
 
 impl<S> Translate<S> {
-    pub fn new(shape: S, v: cgm::Vector2<f32>) -> Self {
+    pub(crate) fn new(shape: S, v: cgm::Vector2<f32>) -> Self {
         Translate {
             shape: shape,
             v: v,
@@ -26,6 +28,8 @@ impl<S> IntoIterator for Translate<S> where S: Shape {
     }
 }
 
+/// Iterator which is produced by `Translate`
+#[derive(Clone, Debug)]
 pub struct TranslateIter<I> {
     iter: I,
     v: cgm::Vector2<f32>,
