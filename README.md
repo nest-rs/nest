@@ -14,34 +14,15 @@ nest = { git = "https://github.com/twh2898/nest.git" }
 
 ```rust
 extern crate nest;
-use nest::{Window, Event, Rectangle, Circle};
+use nest::*;
 
 fn main() {
-	let mut app = Window::new("Nest Example", 640, 480);
+    let mut app = Window::new("Example", 640, 480).expect("error: failed to open window");
 
-	'main: loop {
-		{
-			let mut frame = app.next_frame();
-			frame.clear();
-
-			frame.set_color(0.0, 0.2, 0.5, 1.0);
-			frame.draw_shape(Rectangle {
-				x: -0.5,
-				y: -0.5,
-				w: 1.0,
-				h: 1.0,
-			});
-			
-			frame.finish();
-		}
-
-		for ev in app.poll_events() {
-			match ev {
-				Event::Closed => break 'main,
-				_ => (),
-			}
-		}
-	}
+    while !app.poll_events().any(|e| e == Event::Closed) {
+        app.draw(rect([-0.5, -0.5], [0.5, 0.5]).translate((-0.1, -0.1)).combine(
+            rect([-0.8, -0.8], [0.3, 0.3])).translate([0.1, 0.1]).rotate(0.5));
+    }
 }
 ```
 
