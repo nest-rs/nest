@@ -62,16 +62,15 @@ extern crate cgmath as cgm;
 #[macro_use]
 extern crate error_chain;
 
-pub mod support;
 mod window;
 mod shape;
-pub mod color;
+mod color;
+mod event;
 
-pub use window::Window;
+pub use window::*;
 pub use shape::*;
-pub use color::Color;
-pub use support::events::Event;
-pub use support::vertex;
+pub use color::*;
+pub use event::*;
 /// Re-export of `glium::glutin::ElementState`
 pub use glium::glutin::ElementState;
 /// Re-export of `glium::glutin::VirtualKeyCode`

@@ -2,7 +2,8 @@ use glium;
 use glium::Surface;
 use glium::glutin;
 use std::path;
-use support::events::{self, Event};
+use Event;
+use event;
 use img;
 use glium::texture::Texture2d;
 use std::io::prelude::*;
@@ -164,7 +165,7 @@ impl Window {
         let mut events: Vec<Event> = Vec::new();
 
         self.events_loop.poll_events(|ev| {
-            let event = events::translate(ev);
+            let event = event::translate(ev);
             match event {
                 Event::Unsupported => (),
                 event => events.push(event),
