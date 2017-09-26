@@ -9,10 +9,14 @@ use std::iter::{Chain, Once, once};
 mod translate;
 mod rotate;
 mod combine;
+mod image;
+mod rect;
 
 pub use self::translate::*;
 pub use self::rotate::*;
 pub use self::combine::*;
+pub use self::image::*;
+pub use self::rect::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
@@ -163,89 +167,5 @@ implement_vertex!(Tri, positions, texcoords, color);
 unsafe impl glium::vertex::Attribute for Positions {
     fn get_type() -> glium::vertex::AttributeType {
         glium::vertex::AttributeType::F32x2x3
-    }
-}
-
-/// Two points make a rectangle.
-#[derive(Copy, Clone, Debug)]
-pub struct Rect(pub [f32; 2], pub [f32; 2]);
-
-impl IntoIterator for Rect {
-    type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
-    type Item = RendTri;
-
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        Iterator::chain(once(Tri::new_pos(
-            [
-                [self.0[0], self.0[1]],
-                [self.1[0], self.0[1]],
-                [self.0[0], self.1[1]],
-            ],
-        ).into()), once(Tri::new_pos(
-            [
-                [self.1[0], self.1[1]],
-                [self.0[0], self.1[1]],
-                [self.1[0], self.0[1]],
-            ],
-        ).into()))
-    }
-}
-
-/// Takes two points and creates a rectangle from those two points.
-#[inline]
-pub fn rect<A: Into<cgm::Point2<f32>>, B: Into<cgm::Point2<f32>>>(first: A, second: B) -> Rect {
-    Rect(first.into().into(), second.into().into())
-}
-
-/// Texture rectangle.
-#[derive(Clone, Debug)]
-pub struct Image {
-    rect: Rect,
-    texture: Rc<Texture2d>,
-}
-
-impl IntoIterator for Image {
-    type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
-    type Item = RendTri;
-
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        Iterator::chain(once(RendTri::from(Tri::new(
-            [
-                [self.rect.0[0], self.rect.0[1]],
-                [self.rect.1[0], self.rect.0[1]],
-                [self.rect.0[0], self.rect.1[1]],
-            ],
-            [
-                [1.0, 1.0],
-                [0.0, 1.0],
-                [1.0, 0.0],
-            ],
-            Color::WHITE,
-        )).map_texture(self.texture.clone())), once(RendTri::from(Tri::new(
-            [
-                [self.rect.1[0], self.rect.1[1]],
-                [self.rect.0[0], self.rect.1[1]],
-                [self.rect.1[0], self.rect.0[1]],
-            ],
-            [
-                [0.0, 0.0],
-                [1.0, 0.0],
-                [0.0, 1.0],
-            ],
-            Color::WHITE,
-        )).map_texture(self.texture)))
-    }
-}
-
-/// Takes two points and a texture and draws the texture on the rectangle specified by the two points.
-#[inline]
-pub fn image<A, B, T>(first: A, second: B, texture: T) -> Image
-    where A: Into<cgm::Point2<f32>>, B: Into<cgm::Point2<f32>>, T: Into<Rc<Texture2d>>
-{
-    Image {
-        rect: Rect(first.into().into(), second.into().into()),
-        texture: texture.into(),
     }
 }
