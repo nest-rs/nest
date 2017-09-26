@@ -14,6 +14,10 @@ fn main() {
     // Create an image rectangle from the petal texture with a width of 0.15 and proportional height.
     let petal = image_w(petal_texture, 0.4);
 
+    let flower = (0usize..6).flat_map(|i| petal.translate([0.3, 0.0])
+                                                       .rotate(i as f32 / 6.0 * 2.0 * PI)
+                                             ).collect::<Vec<_>>();
+
     loop {
         // Handle events.
         for event in app.poll_events() {
@@ -26,10 +30,6 @@ fn main() {
             }
         }
 
-        let flower = (0usize..6).flat_map(|i| petal.translate([0.3, 0.0])
-                                                       .rotate(i as f32 / 6.0 * 2.0 * PI)
-                                             ).collect::<Vec<_>>().rotate(start.elapsed().to_secs());
-
-        app.draw(flower);
+        app.draw(flower.rotate(start.elapsed().to_secs()));
     }
 }
