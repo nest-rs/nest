@@ -1,5 +1,5 @@
-use *;
-use std::iter::{Chain, Once, once};
+use ::*;
+use std::iter::{once, Chain, Once};
 
 /// Two points make a rectangle.
 #[derive(Copy, Clone, Debug)]
@@ -11,19 +11,22 @@ impl IntoIterator for Rect {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        Iterator::chain(once(Tri::new_pos(
-            [
-                [self.0[0], self.0[1]],
-                [self.1[0], self.0[1]],
-                [self.0[0], self.1[1]],
-            ],
-        ).into()), once(Tri::new_pos(
-            [
-                [self.1[0], self.1[1]],
-                [self.0[0], self.1[1]],
-                [self.1[0], self.0[1]],
-            ],
-        ).into()))
+        Iterator::chain(
+            once(
+                Tri::new_pos([
+                    [self.0[0], self.0[1]],
+                    [self.1[0], self.0[1]],
+                    [self.0[0], self.1[1]],
+                ]).into(),
+            ),
+            once(
+                Tri::new_pos([
+                    [self.1[0], self.1[1]],
+                    [self.0[0], self.1[1]],
+                    [self.1[0], self.0[1]],
+                ]).into(),
+            ),
+        )
     }
 }
 

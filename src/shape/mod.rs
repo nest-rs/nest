@@ -57,6 +57,7 @@ pub trait Shape: IntoIterator<Item = RendTri> {
 impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
 
 /// Renderable triangle which includes color and texture information.
+#[derive(Clone, Debug)]
 pub struct RendTri {
     pub(crate) tri: Tri,
     pub(crate) texture: Option<Rc<Texture2d>>,

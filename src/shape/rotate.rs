@@ -1,5 +1,5 @@
-use {cgm, Shape, RendTri};
-use cgm::{Rotation, Rotation2, Rad};
+use {cgm, RendTri, Shape};
+use cgm::{Rad, Rotation, Rotation2};
 
 /// `Rotate` represents a shape which has been rotated.
 #[derive(Copy, Clone, Debug)]
@@ -17,7 +17,10 @@ impl<S> Rotate<S> {
     }
 }
 
-impl<S> IntoIterator for Rotate<S> where S: Shape {
+impl<S> IntoIterator for Rotate<S>
+where
+    S: Shape,
+{
     type Item = RendTri;
     type IntoIter = RotateIter<S::IntoIter>;
 
@@ -36,10 +39,15 @@ pub struct RotateIter<I> {
     rotation: cgm::Basis2<f32>,
 }
 
-impl<I> Iterator for RotateIter<I> where I: Iterator<Item=RendTri> {
+impl<I> Iterator for RotateIter<I>
+where
+    I: Iterator<Item = RendTri>,
+{
     type Item = RendTri;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|t| t.map_pos(|p| self.rotation.rotate_point(p)))
+        self.iter
+            .next()
+            .map(|t| t.map_pos(|p| self.rotation.rotate_point(p)))
     }
 }

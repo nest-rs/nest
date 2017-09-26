@@ -54,3 +54,27 @@ pub fn image<A, B, T>(first: A, second: B, texture: T) -> Image
         texture: texture.into(),
     }
 }
+
+/// Takes a width and a texture and automatically adjusts the height to be proportional for the texture.
+/// The resulting image rectangle is centered at the origin.
+#[inline]
+pub fn image_w<T: Into<Rc<Texture2d>>>(texture: T, width: f32) -> Image {
+    let tex = texture.into();
+    let height = tex.height() as f32 / tex.width() as f32 * width;
+    Image {
+        rect: Rect([-width / 2.0, -height / 2.0], [width / 2.0, height / 2.0]),
+        texture: tex,
+    }
+}
+
+/// Takes a height and a texture and automatically adjusts the width to be proportional for the texture.
+/// The resulting image rectangle is centered at the origin.
+#[inline]
+pub fn image_h<T: Into<Rc<Texture2d>>>(texture: T, height: f32) -> Image {
+    let tex = texture.into();
+    let width = tex.width() as f32 / tex.height() as f32 * height;
+    Image {
+        rect: Rect([-width / 2.0, -height / 2.0], [width / 2.0, height / 2.0]),
+        texture: tex,
+    }
+}
