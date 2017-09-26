@@ -17,6 +17,7 @@ pub use self::combine::*;
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
     /// Combine shapes together so they become one shape.
+    #[inline]
     fn combine<S: Shape>(self, rhs: S) -> Combine<Self, S> where Self: Sized {
         Combine(self, rhs)
     }
@@ -29,6 +30,7 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// let mut app = Window::new("Example", 640, 480).unwrap();
     /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).translate([0.1, 0.1]));
     /// ```
+    #[inline]
     fn translate<V: Into<cgm::Vector2<f32>>>(&self, vector: V) -> Translate<Self> where Self: Clone {
         Translate::new(self.clone(), vector.into())
     }
@@ -42,6 +44,7 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// let mut app = Window::new("Example", 640, 480).unwrap();
     /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).rotate(PI));
     /// ```
+    #[inline]
     fn rotate(&self, angle: f32) -> Rotate<Self> where Self: Clone {
         Rotate::new(self.clone(), angle)
     }
@@ -82,6 +85,7 @@ impl RendTri {
 }
 
 impl From<Tri> for RendTri {
+    #[inline]
     fn from(tri: Tri) -> Self {
         RendTri {
             tri: tri,
@@ -95,6 +99,7 @@ impl From<Tri> for RendTri {
 pub struct Positions(pub [[f32; 2]; 3]);
 
 impl Positions {
+    #[inline]
     fn map<F: FnMut(cgm::Point2<f32>) -> cgm::Point2<f32>>(self, mut f: F) -> Positions {
         Positions([f(self.0[0].into()).into(), f(self.0[1].into()).into(), f(self.0[2].into()).into()])
     }
@@ -168,6 +173,8 @@ pub struct Rect(pub [f32; 2], pub [f32; 2]);
 impl IntoIterator for Rect {
     type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
     type Item = RendTri;
+
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         Iterator::chain(once(Tri::new_pos(
             [
@@ -186,6 +193,59 @@ impl IntoIterator for Rect {
 }
 
 /// Takes two points and creates a rectangle from those two points.
+#[inline]
 pub fn rect<A: Into<cgm::Point2<f32>>, B: Into<cgm::Point2<f32>>>(first: A, second: B) -> Rect {
     Rect(first.into().into(), second.into().into())
+}
+
+/// Texture rectangle.
+#[derive(Clone, Debug)]
+pub struct Image {
+    rect: Rect,
+    texture: Rc<Texture2d>,
+}
+
+impl IntoIterator for Image {
+    type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
+    type Item = RendTri;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        Iterator::chain(once(RendTri::from(Tri::new(
+            [
+                [self.rect.0[0], self.rect.0[1]],
+                [self.rect.1[0], self.rect.0[1]],
+                [self.rect.0[0], self.rect.1[1]],
+            ],
+            [
+                [1.0, 1.0],
+                [0.0, 1.0],
+                [1.0, 0.0],
+            ],
+            Color::WHITE,
+        )).map_texture(self.texture.clone())), once(RendTri::from(Tri::new(
+            [
+                [self.rect.1[0], self.rect.1[1]],
+                [self.rect.0[0], self.rect.1[1]],
+                [self.rect.1[0], self.rect.0[1]],
+            ],
+            [
+                [0.0, 0.0],
+                [1.0, 0.0],
+                [0.0, 1.0],
+            ],
+            Color::WHITE,
+        )).map_texture(self.texture)))
+    }
+}
+
+/// Takes two points and a texture and draws the texture on the rectangle specified by the two points.
+#[inline]
+pub fn image<A, B, T>(first: A, second: B, texture: T) -> Image
+    where A: Into<cgm::Point2<f32>>, B: Into<cgm::Point2<f32>>, T: Into<Rc<Texture2d>>
+{
+    Image {
+        rect: Rect(first.into().into(), second.into().into()),
+        texture: texture.into(),
+    }
 }
