@@ -10,7 +10,12 @@ pub struct Color(pub [f32; 4]);
 impl Color {
     /// Scale the brightness of the color
     pub fn scale(self, factor: f32) -> Color {
-        Color([self.0[0] * factor, self.0[1] * factor, self.0[2] * factor, self.0[3]])
+        Color([
+            self.0[0] * factor,
+            self.0[1] * factor,
+            self.0[2] * factor,
+            self.0[3],
+        ])
     }
 
     /// Scale the brightness of the color

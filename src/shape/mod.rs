@@ -9,14 +9,19 @@ use std::iter::{Chain, Once, once};
 mod translate;
 mod rotate;
 mod combine;
+mod image;
+mod rect;
 
 pub use self::translate::*;
 pub use self::rotate::*;
 pub use self::combine::*;
+pub use self::image::*;
+pub use self::rect::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
     /// Combine shapes together so they become one shape.
+    #[inline]
     fn combine<S: Shape>(self, rhs: S) -> Combine<Self, S> where Self: Sized {
         Combine(self, rhs)
     }
@@ -29,6 +34,7 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// let mut app = Window::new("Example", 640, 480).unwrap();
     /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).translate([0.1, 0.1]));
     /// ```
+    #[inline]
     fn translate<V: Into<cgm::Vector2<f32>>>(&self, vector: V) -> Translate<Self> where Self: Clone {
         Translate::new(self.clone(), vector.into())
     }
@@ -42,6 +48,7 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// let mut app = Window::new("Example", 640, 480).unwrap();
     /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).rotate(PI));
     /// ```
+    #[inline]
     fn rotate(&self, angle: f32) -> Rotate<Self> where Self: Clone {
         Rotate::new(self.clone(), angle)
     }
@@ -50,6 +57,7 @@ pub trait Shape: IntoIterator<Item = RendTri> {
 impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
 
 /// Renderable triangle which includes color and texture information.
+#[derive(Clone, Debug)]
 pub struct RendTri {
     pub(crate) tri: Tri,
     pub(crate) texture: Option<Rc<Texture2d>>,
@@ -82,6 +90,7 @@ impl RendTri {
 }
 
 impl From<Tri> for RendTri {
+    #[inline]
     fn from(tri: Tri) -> Self {
         RendTri {
             tri: tri,
@@ -95,6 +104,7 @@ impl From<Tri> for RendTri {
 pub struct Positions(pub [[f32; 2]; 3]);
 
 impl Positions {
+    #[inline]
     fn map<F: FnMut(cgm::Point2<f32>) -> cgm::Point2<f32>>(self, mut f: F) -> Positions {
         Positions([f(self.0[0].into()).into(), f(self.0[1].into()).into(), f(self.0[2].into()).into()])
     }
@@ -159,33 +169,4 @@ unsafe impl glium::vertex::Attribute for Positions {
     fn get_type() -> glium::vertex::AttributeType {
         glium::vertex::AttributeType::F32x2x3
     }
-}
-
-/// Two points make a rectangle.
-#[derive(Copy, Clone, Debug)]
-pub struct Rect(pub [f32; 2], pub [f32; 2]);
-
-impl IntoIterator for Rect {
-    type IntoIter = Chain<Once<RendTri>, Once<RendTri>>;
-    type Item = RendTri;
-    fn into_iter(self) -> Self::IntoIter {
-        Iterator::chain(once(Tri::new_pos(
-            [
-                [self.0[0], self.0[1]],
-                [self.1[0], self.0[1]],
-                [self.0[0], self.1[1]],
-            ],
-        ).into()), once(Tri::new_pos(
-            [
-                [self.1[0], self.1[1]],
-                [self.0[0], self.1[1]],
-                [self.1[0], self.0[1]],
-            ],
-        ).into()))
-    }
-}
-
-/// Takes two points and creates a rectangle from those two points.
-pub fn rect<A: Into<cgm::Point2<f32>>, B: Into<cgm::Point2<f32>>>(first: A, second: B) -> Rect {
-    Rect(first.into().into(), second.into().into())
 }
