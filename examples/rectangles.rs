@@ -6,7 +6,7 @@ fn main() {
 
     while !app.poll_events().any(|e| e == Event::Closed) {
         app.draw(
-            rect([-0.5, -0.5], [0.5, 0.5]).combine(rect([-0.8, -0.8], [0.3, 0.3])),
+            rect([-0.5, -0.5], [0.5, 0.5]).combine(crect([-0.8, -0.8], [0.3, 0.3], Color::CYAN)),
         );
     }
 }

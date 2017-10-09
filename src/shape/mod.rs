@@ -11,12 +11,14 @@ mod rotate;
 mod combine;
 mod image;
 mod rect;
+mod crect;
 
 pub use self::translate::*;
 pub use self::rotate::*;
 pub use self::combine::*;
 pub use self::image::*;
 pub use self::rect::*;
+pub use self::crect::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
