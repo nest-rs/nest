@@ -8,7 +8,7 @@ use glium::uniforms::{AsUniformValue, UniformValue};
 pub struct Color(pub [f32; 4]);
 
 impl Color {
-    /// Scale the brightness of the color
+    /// Scale the brightness of the color.
     pub fn scale(self, factor: f32) -> Color {
         Color([
             self.0[0] * factor,
@@ -18,12 +18,12 @@ impl Color {
         ])
     }
 
-    /// Scale the brightness of the color
+    /// Scale the transparency of the color.
     pub fn alpha(self, factor: f32) -> Color {
         Color([self.0[0], self.0[1], self.0[2], self.0[3] * factor])
     }
 
-    /// Multiply the colors together (scale every component by each other)
+    /// Multiply the colors together (scale every component by each other).
     pub fn multiply<C: Into<Color>>(self, other: C) -> Color {
         let other = other.into();
         Color([
