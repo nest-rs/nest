@@ -1,24 +1,28 @@
 use glium;
 use cgm;
 
-use color::Color;
+use Color;
 use std::rc::Rc;
 use glium::texture::Texture2d;
-use std::iter::{Chain, Once, once};
 
 mod translate;
 mod rotate;
 mod combine;
 mod image;
 mod rect;
-mod crect;
+mod recolor;
+mod mulcolor;
 
-pub use self::translate::*;
-pub use self::rotate::*;
-pub use self::combine::*;
+// Combinator helper structs
+use self::translate::*;
+use self::rotate::*;
+use self::combine::*;
+use self::recolor::*;
+use self::mulcolor::*;
+
+// User types
 pub use self::image::*;
 pub use self::rect::*;
-pub use self::crect::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
@@ -54,6 +58,78 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     fn rotate(&self, angle: f32) -> Rotate<Self> where Self: Clone {
         Rotate::new(self.clone(), angle)
     }
+
+    /// Completely recolor a shape.
+    ///
+    /// This does not erase textures, just colors them. Calling recolor() will
+    /// cause every component of the shape to change its color to the passed
+    /// color and should not be used in most situations as it erases
+    /// sub-component color information. This can be used to make
+    /// silhouettes and some other effects, but is mostly not useful.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).recolor(Color::BLUE));
+    /// ```
+    #[inline]
+    fn recolor<C: Into<Color>>(&self, color: C) -> Recolor<Self> where Self: Clone {
+        Recolor::new(self.clone(), color.into())
+    }
+
+    /// Multiply all of the colors in the shape component-wise with
+    /// the passed color. See `Color::multiply()`.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// // This will be drawn with Color([0.0, 0.0, 0.5, 1.0]).
+    /// // It extracts only the blue and alpha components.
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
+    ///    .recolor([0.5, 0.5, 0.5, 1.0])
+    ///    .mul_color(Color::BLUE));
+    /// ```
+    #[inline]
+    fn mul_color<C: Into<Color>>(&self, color: C) -> Mulcolor<Self> where Self: Clone {
+        Mulcolor::new(self.clone(), color.into())
+    }
+
+    /// Multiply all of the colors in the shape component-wise with
+    /// the passed color. See `Color::multiply()`.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// // This will be drawn with Color([0.25, 0.5, 0.5, 1.0]).
+    /// // It extracts half of the color components.
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
+    ///    .recolor([0.5, 1.0, 1.0, 1.0])
+    ///    .scale_color(0.5));
+    /// ```
+    #[inline]
+    fn scale_color(&self, scale: f32) -> Mulcolor<Self> where Self: Clone {
+        Mulcolor::new(self.clone(), Color([scale, scale, scale, 1.0]))
+    }
+
+    /// Scales the transparrency/alpha value of the shape's color.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// // This will be drawn with Color([0.5, 1.0, 1.0, 0.5]).
+    /// // It extracts half of the alpha component.
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
+    ///    .recolor([0.5, 1.0, 1.0, 1.0])
+    ///    .scale_alpha(0.5));
+    /// ```
+    #[inline]
+    fn scale_alpha(&self, scale: f32) -> Mulcolor<Self> where Self: Clone {
+        Mulcolor::new(self.clone(), Color([1.0, 1.0, 1.0, scale]))
+    }
 }
 
 impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
@@ -79,8 +155,8 @@ impl RendTri {
     }
 
     #[inline]
-    fn map_color<F: FnMut([f32; 4]) -> [f32; 4]>(mut self, mut f: F) -> RendTri {
-        self.tri.color = f(self.tri.color);
+    fn map_color<F: FnMut(Color) -> Color>(mut self, mut f: F) -> RendTri {
+        self.tri.color = f(Color(self.tri.color)).0;
         self
     }
 
