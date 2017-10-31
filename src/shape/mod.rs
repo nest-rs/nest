@@ -11,6 +11,7 @@ mod combine;
 mod image;
 mod rect;
 mod recolor;
+mod mulcolor;
 
 pub use self::translate::*;
 pub use self::rotate::*;
@@ -18,6 +19,7 @@ pub use self::combine::*;
 pub use self::image::*;
 pub use self::rect::*;
 pub use self::recolor::*;
+pub use self::mulcolor::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
@@ -69,8 +71,26 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).recolor(Color::BLUE));
     /// ```
     #[inline]
-    fn recolor(&self, color: Color) -> Recolor<Self> where Self: Clone {
-        Recolor::new(self.clone(), color)
+    fn recolor<C: Into<Color>>(&self, color: C) -> Recolor<Self> where Self: Clone {
+        Recolor::new(self.clone(), color.into())
+    }
+
+    /// Multiply all of the colors in the shape component-wise with
+    /// the passed color. See `Color::multiply()`.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// // This will be drawn with Color([0.0, 0.0, 0.5, 1.0]).
+    /// // It extracts only the blue and alpha components.
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
+    ///    .recolor([0.5, 0.5, 0.5, 1.0])
+    ///    .mulcolor(Color::BLUE));
+    /// ```
+    #[inline]
+    fn mulcolor<C: Into<Color>>(&self, color: C) -> Mulcolor<Self> where Self: Clone {
+        Mulcolor::new(self.clone(), color.into())
     }
 }
 

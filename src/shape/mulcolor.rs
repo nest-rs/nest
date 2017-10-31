@@ -1,44 +1,44 @@
 use {RendTri, Shape, Color};
 
-/// `Recolor` represents a shape which has had its color set to a new one.
+/// `Mulcolor` represents a shape which has had its color multiplied by another.
 #[derive(Copy, Clone, Debug)]
-pub struct Recolor<S> {
+pub struct Mulcolor<S> {
     shape: S,
     color: Color,
 }
 
-impl<S> Recolor<S> {
+impl<S> Mulcolor<S> {
     pub(crate) fn new(shape: S, color: Color) -> Self {
-        Recolor {
+        Mulcolor {
             shape: shape,
             color: color,
         }
     }
 }
 
-impl<S> IntoIterator for Recolor<S>
+impl<S> IntoIterator for Mulcolor<S>
 where
     S: Shape,
 {
     type Item = RendTri;
-    type IntoIter = RecolorIter<S::IntoIter>;
+    type IntoIter = MulcolorIter<S::IntoIter>;
 
     fn into_iter(self) -> Self::IntoIter {
-        RecolorIter {
+        MulcolorIter {
             iter: self.shape.into_iter(),
             color: self.color,
         }
     }
 }
 
-/// Iterator which is produced by `Recolor`
+/// Iterator which is produced by `Mulcolor`
 #[derive(Clone, Debug)]
-pub struct RecolorIter<I> {
+pub struct MulcolorIter<I> {
     iter: I,
     color: Color,
 }
 
-impl<I> Iterator for RecolorIter<I>
+impl<I> Iterator for MulcolorIter<I>
 where
     I: Iterator<Item = RendTri>,
 {
@@ -47,6 +47,6 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         self.iter
             .next()
-            .map(|t| t.map_color(|_| self.color))
+            .map(|t| t.map_color(|c| c.multiply(self.color)))
     }
 }
