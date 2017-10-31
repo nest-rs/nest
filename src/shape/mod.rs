@@ -86,11 +86,46 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     /// // It extracts only the blue and alpha components.
     /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
     ///    .recolor([0.5, 0.5, 0.5, 1.0])
-    ///    .mulcolor(Color::BLUE));
+    ///    .mul_color(Color::BLUE));
     /// ```
     #[inline]
-    fn mulcolor<C: Into<Color>>(&self, color: C) -> Mulcolor<Self> where Self: Clone {
+    fn mul_color<C: Into<Color>>(&self, color: C) -> Mulcolor<Self> where Self: Clone {
         Mulcolor::new(self.clone(), color.into())
+    }
+
+    /// Multiply all of the colors in the shape component-wise with
+    /// the passed color. See `Color::multiply()`.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// // This will be drawn with Color([0.25, 0.5, 0.5, 1.0]).
+    /// // It extracts half of the color components.
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
+    ///    .recolor([0.5, 1.0, 1.0, 1.0])
+    ///    .scale_color(0.5));
+    /// ```
+    #[inline]
+    fn scale_color(&self, scale: f32) -> Mulcolor<Self> where Self: Clone {
+        Mulcolor::new(self.clone(), Color([scale, scale, scale, 1.0]))
+    }
+
+    /// Scales the transparrency/alpha value of the shape's color.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// // This will be drawn with Color([0.5, 1.0, 1.0, 0.5]).
+    /// // It extracts half of the alpha component.
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5])
+    ///    .recolor([0.5, 1.0, 1.0, 1.0])
+    ///    .scale_alpha(0.5));
+    /// ```
+    #[inline]
+    fn scale_alpha(&self, scale: f32) -> Mulcolor<Self> where Self: Clone {
+        Mulcolor::new(self.clone(), Color([1.0, 1.0, 1.0, scale]))
     }
 }
 
