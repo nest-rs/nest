@@ -1,22 +1,23 @@
 use glium;
 use cgm;
 
-use color::Color;
+use Color;
 use std::rc::Rc;
 use glium::texture::Texture2d;
-use std::iter::{Chain, Once, once};
 
 mod translate;
 mod rotate;
 mod combine;
 mod image;
 mod rect;
+mod recolor;
 
 pub use self::translate::*;
 pub use self::rotate::*;
 pub use self::combine::*;
 pub use self::image::*;
 pub use self::rect::*;
+pub use self::recolor::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
@@ -52,6 +53,25 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     fn rotate(&self, angle: f32) -> Rotate<Self> where Self: Clone {
         Rotate::new(self.clone(), angle)
     }
+
+    /// Completely recolor a shape.
+    ///
+    /// This does not erase textures, just colors them. Calling recolor() will
+    /// cause every component of the shape to change its color to the passed
+    /// color and should not be used in most situations as it erases
+    /// sub-component color information. This can be used to make
+    /// silhouettes and some other effects, but is mostly not useful.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).recolor(Color::BLUE));
+    /// ```
+    #[inline]
+    fn recolor(&self, color: Color) -> Recolor<Self> where Self: Clone {
+        Recolor::new(self.clone(), color)
+    }
 }
 
 impl<S> Shape for S where S: IntoIterator<Item = RendTri> {}
@@ -77,8 +97,8 @@ impl RendTri {
     }
 
     #[inline]
-    fn map_color<F: FnMut([f32; 4]) -> [f32; 4]>(mut self, mut f: F) -> RendTri {
-        self.tri.color = f(self.tri.color);
+    fn map_color<F: FnMut(Color) -> Color>(mut self, mut f: F) -> RendTri {
+        self.tri.color = f(Color(self.tri.color)).0;
         self
     }
 
