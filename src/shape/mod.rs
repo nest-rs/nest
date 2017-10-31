@@ -13,13 +13,16 @@ mod rect;
 mod recolor;
 mod mulcolor;
 
-pub use self::translate::*;
-pub use self::rotate::*;
-pub use self::combine::*;
+// Combinator helper structs
+use self::translate::*;
+use self::rotate::*;
+use self::combine::*;
+use self::recolor::*;
+use self::mulcolor::*;
+
+// User types
 pub use self::image::*;
 pub use self::rect::*;
-pub use self::recolor::*;
-pub use self::mulcolor::*;
 
 /// Trait for structs to be drawn with `Frame::draw`
 pub trait Shape: IntoIterator<Item = RendTri> {
