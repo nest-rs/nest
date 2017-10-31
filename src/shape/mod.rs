@@ -7,6 +7,7 @@ use glium::texture::Texture2d;
 
 mod translate;
 mod rotate;
+mod scale;
 mod combine;
 mod image;
 mod rect;
@@ -16,6 +17,7 @@ mod mulcolor;
 // Combinator helper structs
 use self::translate::*;
 use self::rotate::*;
+use self::scale::*;
 use self::combine::*;
 use self::recolor::*;
 use self::mulcolor::*;
@@ -32,7 +34,8 @@ pub trait Shape: IntoIterator<Item = RendTri> {
         Combine(self, rhs)
     }
 
-    /// Translate a shape using a `vector` which represents the direction and magnitude to translate it by.
+    /// Translate a shape using a `vector` which represents the direction and
+    /// magnitude to translate it by.
     ///
     /// ## Example
     /// ```rust,no_run
@@ -57,6 +60,62 @@ pub trait Shape: IntoIterator<Item = RendTri> {
     #[inline]
     fn rotate(&self, angle: f32) -> Rotate<Self> where Self: Clone {
         Rotate::new(self.clone(), angle)
+    }
+
+    /// Scale a shape using a `vector` which represents the magnitude to scale
+    /// it by.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).scale_both([0.1, 0.1]));
+    /// ```
+    #[inline]
+    fn scale_both<V: Into<cgm::Vector2<f32>>>(&self, scale: V) -> Scale<Self> where Self: Clone {
+        Scale::new(self.clone(), scale.into())
+    }
+
+    /// Scale a shape in both dimensions using a `f32` which represents the
+    /// magnitude to scale it by.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).scale(0.1));
+    /// ```
+    #[inline]
+    fn scale(&self, scale: f32) -> Scale<Self> where Self: Clone {
+        Scale::new(self.clone(), cgm::Vector2::new(scale, scale))
+    }
+
+    /// Scale a shape in the x dimension using a `f32` which represents the
+    /// magnitude to scale it by.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).scale_x(0.1));
+    /// ```
+    #[inline]
+    fn scale_x(&self, scale_x: f32) -> Scale<Self> where Self: Clone {
+        Scale::new(self.clone(), cgm::Vector2::new(scale_x, 1.0))
+    }
+
+    /// Scale a shape in the y dimension using a `f32` which represents the
+    /// magnitude to scale it by.
+    ///
+    /// ## Example
+    /// ```rust,no_run
+    /// use nest::*;
+    /// let mut app = Window::new("Example", 640, 480).unwrap();
+    /// app.draw(Rect([-0.5, -0.5], [0.5, 0.5]).scale_y(0.1));
+    /// ```
+    #[inline]
+    fn scale_y(&self, scale_y: f32) -> Scale<Self> where Self: Clone {
+        Scale::new(self.clone(), cgm::Vector2::new(1.0, scale_y))
     }
 
     /// Completely recolor a shape.
